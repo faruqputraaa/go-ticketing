@@ -1,0 +1,2 @@
+CREATE TABLE IF NOT EXISTS events(
+  id_events INT PRIMARY KEY,)
