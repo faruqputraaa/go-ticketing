@@ -1,0 +1,10 @@
+BEGIN;
+
+CREATE TABLE IF NOT EXISTS tickets(
+    id_ticket INTEGER PRIMARY KEY AUTO_INCREMENT ,
+    price INTEGER(255) NOT NULL,
+    category VARCHAR(255) NOT NULL,
+    id_event INTEGER(255) NOT NULL
+);
+
+COMMIT;
