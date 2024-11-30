@@ -1,2 +1,11 @@
+BEGIN;
+
 CREATE TABLE IF NOT EXISTS events(
-  id_events INT PRIMARY KEY,)
+    id_event INTEGER PRIMARY KEY AUTO_INCREMENT ,
+    name VARCHAR(255) NOT NULL,
+    location VARCHAR(255) NOT NULL,
+    time INTEGER(255) NOT NULL,
+    description VARCHAR(255) NOT NULL
+);
+
+COMMIT;
