@@ -19,6 +19,10 @@ type ticketRepository struct {
 	db *gorm.DB
 }
 
+func NewTicketRepository(db *gorm.DB) TicketRepository {
+	return &ticketRepository{db}
+}
+
 // Create implements TicketRepository.
 func (r *ticketRepository) Create(ctx context.Context, ticket *entity.Ticket) error {
 	return r.db.WithContext(ctx).Create(ticket).Error
@@ -51,8 +55,4 @@ func (r *ticketRepository) GetByID(ctx context.Context, id int64) (*entity.Ticke
 // Update implements TicketRepository.
 func (r *ticketRepository) Update(ctx context.Context, ticket *entity.Ticket) error {
 	return r.db.WithContext(ctx).Updates(ticket).Error
-}
-
-func NewTicketRepository(db *gorm.DB) TicketRepository {
-	return &ticketRepository{db}
 }

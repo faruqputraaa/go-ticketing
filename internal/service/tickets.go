@@ -19,6 +19,10 @@ type ticketService struct {
 	ticketRepository repository.TicketRepository
 }
 
+func NewTicketService(ticketRepository repository.TicketRepository) TicketService {
+	return &ticketService{ticketRepository}
+}
+
 // Create implements TicketService.
 func (s *ticketService) Create(ctx context.Context, ticket *entity.Ticket) error {
 	return s.ticketRepository.Create(ctx, ticket)
@@ -43,8 +47,4 @@ func (s *ticketService) GetByID(ctx context.Context, id int64) (*entity.Ticket, 
 func (s *ticketService) Update(ctx context.Context, ticket *entity.Ticket) error {
 	return s.ticketRepository.Update(ctx, ticket)
 
-}
-
-func NewTicketService(ticketRepository repository.TicketRepository) TicketService {
-	return &ticketService{ticketRepository}
 }
