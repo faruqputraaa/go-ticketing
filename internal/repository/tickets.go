@@ -10,6 +10,7 @@ import (
 type TicketRepository interface {
 	GetAll(ctx context.Context) ([]entity.Ticket, error)
 	GetByID(ctx context.Context, id int64) (*entity.Ticket, error)
+	GetByIdEvent(ctx context.Context, IDEvent int64) ([]entity.Ticket, error)
 	Create(ctx context.Context, ticket *entity.Ticket) error
 	Update(ctx context.Context, ticket *entity.Ticket) error
 	Delete(ctx context.Context, ticket *entity.Ticket) error
@@ -50,6 +51,16 @@ func (r *ticketRepository) GetByID(ctx context.Context, id int64) (*entity.Ticke
 		return nil, err
 	}
 	return result, nil
+}
+
+// GetByIdEvent implements TicketRepository.
+func (r *ticketRepository) GetByIdEvent(ctx context.Context, IDEvent int64) ([]entity.Ticket, error) {
+	var tickets []entity.Ticket
+	err := r.db.WithContext(ctx).Where("id_event = ?", IDEvent).Find(&tickets).Error
+	if err != nil {
+		return nil, err
+	}
+	return tickets, nil
 }
 
 // Update implements TicketRepository.

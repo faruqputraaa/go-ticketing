@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+
 	"github.com/faruqputraaa/go-ticket/config"
 	"github.com/faruqputraaa/go-ticket/pkg/database"
 	_ "github.com/golang-migrate/migrate/v4"
@@ -16,7 +17,7 @@ func main() {
 
 	_, err = database.InitDatabase(cfg.PostgresConfig)
 	checkError(err)
-	fmt.Println(cfg)
+	fmt.Println("database connected")
 
 }
 
