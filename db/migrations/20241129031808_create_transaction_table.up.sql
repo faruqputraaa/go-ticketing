@@ -1,7 +1,7 @@
 BEGIN;
 
 CREATE TABLE IF NOT EXISTS transactions(
-    id_transaction INT PRIMARY KEY,
+    id_transaction INT PRIMARY KEY AUTO_INCREMENT,
     id_user INT NOT NULL,
     quantity_ticket INT NOT NULL,
     id_event INT NOT NULL,
