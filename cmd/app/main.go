@@ -15,6 +15,7 @@ func main() {
 	cfg, err := config.NewConfig(".env")
 	checkError(err)
 
+	// Inisialisasi database PostgreSQL
 	_, err = database.InitDatabase(cfg.PostgresConfig)
 	checkError(err)
 	fmt.Println("database connected")

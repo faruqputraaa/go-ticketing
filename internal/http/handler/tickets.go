@@ -41,7 +41,7 @@ func (h *TicketHandler) GetTicket(ctx echo.Context) error {
 func (h *TicketHandler) GetTicketsByIDEvent(ctx echo.Context) error {
 	var req dto.GetTicketByIDEventRequest
 	if err := ctx.Bind(&req); err != nil {
-		return ctx.JSON(http.StatusBadRequest, response.ErrorResponse(http.StatusBadRequest, "IDevent is required"))
+		return ctx.JSON(http.StatusBadRequest, response.ErrorResponse(http.StatusBadRequest, err.Error()))
 	}
 
 	// Panggil service untuk mendapatkan tiket berdasarkan IDevent
