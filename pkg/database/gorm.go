@@ -14,6 +14,7 @@ func InitDatabase(cfg config.PostgresConfig) (*gorm.DB, error) {
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
 		Logger: logger.Default.LogMode(logger.Info),
 	})
+	fmt.Println("succefully connected database")
 	if err != nil {
 		return nil, err
 	}

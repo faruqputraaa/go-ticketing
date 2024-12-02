@@ -1,27 +1,60 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"github.com/faruqputraaa/go-ticket/config"
+	"github.com/faruqputraaa/go-ticket/internal/builder"
 	"github.com/faruqputraaa/go-ticket/pkg/database"
-	_ "github.com/golang-migrate/migrate/v4"
-	_ "github.com/golang-migrate/migrate/v4/database/postgres"
-	_ "github.com/golang-migrate/migrate/v4/source/github"
-	_ "github.com/lib/pq"
+	"github.com/faruqputraaa/go-ticket/pkg/server"
+	"log"
+	"os"
+	"os/signal"
+	"time"
 )
 
 func main() {
 	cfg, err := config.NewConfig(".env")
 	checkError(err)
 
-	_, err = database.InitDatabase(cfg.PostgresConfig)
+	db, err := database.InitDatabase(cfg.PostgresConfig)
 	checkError(err)
-	fmt.Println(cfg)
+	fmt.Println(cfg, db)
 
+	publicRoutes := builder.BuildPublicRoute(db)
+	privateRoutes := builder.BuildPrivateRoute(db)
+
+	srv := server.NewServer(publicRoutes, privateRoutes)
+
+	waitForShutdown(srv)
+	runServer(srv, cfg.PORT)
+}
+
+func runServer(srv *server.Server, port string) {
+	go func() {
+		err := srv.Start(fmt.Sprintf(":%s", port))
+		log.Fatal(err)
+	}()
 }
 
 func checkError(err error) {
 	if err != nil {
 		panic(err)
 	}
+}
+
+func waitForShutdown(srv *server.Server) {
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, os.Interrupt)
+
+	<-quit
+	log.Println("Mematikan server...")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	if err := srv.Shutdown(ctx); err != nil {
+		log.Fatalf("Gagal mematikan server: %v", err)
+	}
+	log.Println("Server berhasil dimatikan.")
 }

@@ -17,7 +17,7 @@ type Config struct {
 type JWTConfig struct {
 	SecretKey string `env:"SECRET_KEY" envDefault:"secret" mapstructure:"SECRET_KEY"`
 }
-
+	
 type PostgresConfig struct {
 	Host     string `env:"HOST" envDefault:"localhost" mapstructure:"HOST"`
 	Port     string `env:"PORT" envDefault:"5432" mapstructure:"PORT"`
