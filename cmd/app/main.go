@@ -19,12 +19,12 @@ func main() {
 
 	db, err := database.InitDatabase(cfg.PostgresConfig)
 	checkError(err)
-	fmt.Println(cfg, db)
+	fmt.Println(cfg)
 
-	publicRoutes := builder.BuildPublicRoute(db)
-	privateRoutes := builder.BuildPrivateRoute(db)
+	publicRoute := builder.BuildPublicRoute(db)
+	privateRoute := builder.BuildPrivateRoute(db)
 
-	srv := server.NewServer(publicRoutes, privateRoutes)
+	srv := server.NewServer(publicRoute, privateRoute)
 
 	waitForShutdown(srv)
 	runServer(srv, cfg.PORT)

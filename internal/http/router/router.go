@@ -18,5 +18,5 @@ func PublicRoutes(userHandler handler.UserHandler) []route.Route {
 }
 
 func PrivateRoutes() []route.Route {
-	return []route.Route{}
+	return nil
 }
