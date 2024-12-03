@@ -1,7 +1,7 @@
 BEGIN;
 
 CREATE TABLE IF NOT EXISTS offers(
-    id_offer INT PRIMARY KEY AUTO_INCREMENTS,
+    id_offer BIGSERIAL PRIMARY KEY,
     id_user INT NOT NULL,
     name_event VARCHAR(255) NOT NULL,
     description TEXT NOT NULL,

@@ -1,10 +1,10 @@
 BEGIN;
 
 CREATE TABLE IF NOT EXISTS events(
-    id_event INTEGER PRIMARY KEY AUTO_INCREMENT ,
+    id_event BIGSERIAL PRIMARY KEY ,
     name VARCHAR(255) NOT NULL,
     location VARCHAR(255) NOT NULL,
-    time INTEGER(255) NOT NULL,
+    time DATE NOT NULL,
     description VARCHAR(255) NOT NULL
 );
 
