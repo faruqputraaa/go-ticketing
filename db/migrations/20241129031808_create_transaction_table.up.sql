@@ -13,6 +13,6 @@ CREATE TABLE IF NOT EXISTS transactions(
     FOREIGN KEY (id_user) REFERENCES users(id_user),
     FOREIGN KEY (id_event) REFERENCES events(id_events),
     FOREIGN KEY (id_ticket) REFERENCES tickets(id_ticket)
-)
+);
 
 COMMIT;
