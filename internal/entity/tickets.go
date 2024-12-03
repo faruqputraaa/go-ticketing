@@ -9,5 +9,5 @@ type Ticket struct {
 }
 
 func (Ticket) TableName() string {
-	return "ticket"
+	return "tickets"
 }

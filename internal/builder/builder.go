@@ -12,14 +12,17 @@ import (
 func BuildPublicRoute(db *gorm.DB) []route.Route {
 	//repository
 	userRepository := repository.NewUserRepository(db)
+	ticketRepository := repository.NewTicketRepository(db)
 
 	//service
 	userService := service.NewUserService(userRepository)
+	ticketService := service.NewTicketService(ticketRepository)
 
 	//handler
 	userHandler := handler.NewUserHandler(userService)
+	ticketHandler := handler.NewTicketHandler(ticketService)
 
-	return router.PublicRoutes(userHandler)
+	return router.PublicRoutes(userHandler, ticketHandler)
 }
 
 func BuildPrivateRoute(db *gorm.DB) []route.Route {

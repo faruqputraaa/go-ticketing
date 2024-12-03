@@ -6,12 +6,22 @@ import (
 	"net/http"
 )
 
-func PublicRoutes(userHandler handler.UserHandler) []route.Route {
+func PublicRoutes(userHandler handler.UserHandler, ticketHandler handler.TicketHandler) []route.Route {
 	return []route.Route{
 		{
 			Method:  http.MethodPost,
 			Path:    "/login",
 			Handler: userHandler.Login,
+		},
+		{
+			Method:  http.MethodPost,
+			Path:    "/ticket",
+			Handler: ticketHandler.CreateTicket,
+		},
+		{
+			Method:  http.MethodGet,
+			Path:    "/ticket",
+			Handler: ticketHandler.GetTickets,
 		},
 	}
 

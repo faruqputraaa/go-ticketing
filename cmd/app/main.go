@@ -26,8 +26,8 @@ func main() {
 
 	srv := server.NewServer(publicRoute, privateRoute)
 
-	waitForShutdown(srv)
 	runServer(srv, cfg.PORT)
+	waitForShutdown(srv)
 }
 
 func runServer(srv *server.Server, port string) {
