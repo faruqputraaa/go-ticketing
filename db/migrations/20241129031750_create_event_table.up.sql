@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS events(
     name VARCHAR(255) NOT NULL,
     location VARCHAR(255) NOT NULL,
     time DATE NOT NULL,
-    description VARCHAR(255) NOT NULL
+    description VARCHAR(255) NOT NULL   
 );
 
 COMMIT;

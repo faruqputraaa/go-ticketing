@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-func PublicRoutes(userHandler handler.UserHandler, ticketHandler handler.TicketHandler) []route.Route {
+func PublicRoutes(userHandler handler.UserHandler, ticketHandler handler.TicketHandler, eventHandler handler.EventHandler) []route.Route {
 	return []route.Route{
 		{
 			Method:  http.MethodPost,
@@ -22,6 +22,16 @@ func PublicRoutes(userHandler handler.UserHandler, ticketHandler handler.TicketH
 			Method:  http.MethodGet,
 			Path:    "/ticket",
 			Handler: ticketHandler.GetTickets,
+		},
+		{
+			Method:  http.MethodGet,
+			Path:    "/event",
+			Handler: eventHandler.GetEvents,
+		},
+		{
+			Method:  http.MethodPost,
+			Path:    "/event",
+			Handler: eventHandler.CreateEvent,
 		},
 	}
 
