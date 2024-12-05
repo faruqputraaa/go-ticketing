@@ -57,7 +57,7 @@ func (s *userService) Login(ctx context.Context, username string, password strin
 func (s *userService) Register(ctx context.Context, req dto.UserRegisterRequest) error {
 	user := new(entity.User)
 	user.Username = req.Username
-	user.Role = "User"
+	user.Role = "BUYER"
 
 	exist, err := s.userRepository.GetByUsername(ctx, req.Username)
 	if err == nil && exist != nil {

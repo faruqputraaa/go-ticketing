@@ -8,9 +8,9 @@ import (
 )
 
 var (
-	adminOnly= []string{"Administrator"}
+	adminOnly= []string{"ADMIN"}
 	//userOnly = []string{"User"}
-	allRoles = []string{"Administrator", "User"}
+	allRoles = []string{"ADMIN", "BUYER"}
 )
 
 func PublicRoutes(

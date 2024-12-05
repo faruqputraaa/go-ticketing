@@ -46,5 +46,5 @@ func BuildPrivateRoute(cfg *config.Config, db *gorm.DB) []route.Route {
 	ticketHandler := handler.NewTicketHandler(ticketService)
 	eventHandler := handler.NewEventHandler(eventService)
 
-	return router.PublicRoutes(userHandler, ticketHandler, eventHandler)
+	return router.PrivateRoutes(userHandler, ticketHandler, eventHandler)
 }
