@@ -3,14 +3,15 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/faruqputraaa/go-ticket/config"
-	"github.com/faruqputraaa/go-ticket/internal/builder"
-	"github.com/faruqputraaa/go-ticket/pkg/database"
-	"github.com/faruqputraaa/go-ticket/pkg/server"
 	"log"
 	"os"
 	"os/signal"
 	"time"
+
+	"github.com/faruqputraaa/go-ticket/config"
+	"github.com/faruqputraaa/go-ticket/internal/builder"
+	"github.com/faruqputraaa/go-ticket/pkg/database"
+	"github.com/faruqputraaa/go-ticket/pkg/server"
 )
 
 func main() {
@@ -21,10 +22,10 @@ func main() {
 	checkError(err)
 	fmt.Println(cfg)
 
-	publicRoute := builder.BuildPublicRoute(db)
-	privateRoute := builder.BuildPrivateRoute(db)
+	publicRoute := builder.BuildPublicRoute(cfg, db)
+	privateRoute := builder.BuildPrivateRoute(cfg, db)
 
-	srv := server.NewServer(publicRoute, privateRoute)
+	srv := server.NewServer(cfg,publicRoute, privateRoute)
 
 	runServer(srv, cfg.PORT)
 	waitForShutdown(srv)

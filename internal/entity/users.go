@@ -3,10 +3,10 @@ package entity
 type User struct {
 	IDUser   int    `json:"id"`
 	Username string `json:"username"`
-	Password string `json:"password"`
+	Password string `json:"-"`
 	Role     string `json:"role"`
 }
 
 func (User) TableName() string {
-	return "user"
+	return "users"
 }

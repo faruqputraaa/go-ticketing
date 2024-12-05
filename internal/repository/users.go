@@ -10,6 +10,10 @@ import (
 type UserRepository interface {
 	GetAll(ctx context.Context) ([]entity.User, error)
 	GetByUsername(ctx context.Context, username string) (*entity.User, error)
+	GetByID(ctx context.Context, id int) (*entity.User, error)
+	Create(ctx context.Context, user *entity.User) error
+	Update(ctx context.Context, user *entity.User) error
+	Delete(ctx context.Context, user *entity.User) error
 }
 
 type userRepository struct {
@@ -35,4 +39,26 @@ func (r *userRepository) GetByUsername(ctx context.Context, username string) (*e
 		return nil, err
 	}
 	return result, nil
+}
+
+func (r *userRepository) GetByID(ctx context.Context, id int) (*entity.User, error){
+	result := new(entity.User)
+
+	if err := r.db.WithContext(ctx).Where("id = ?", id).First(&result).Error; err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
+func (r *userRepository) Create(ctx context.Context, user *entity.User) error {
+	return r.db.WithContext(ctx).Create(&user).Error
+}
+
+func (r *userRepository) Update(ctx context.Context, user *entity.User) error{
+	return r.db.WithContext(ctx).Save(&user).Error
+}
+
+func (r *userRepository) Delete(ctx context.Context, user *entity.User) error{
+	return r.db.WithContext(ctx).Delete(&user).Error
 }

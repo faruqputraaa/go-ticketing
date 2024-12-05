@@ -1,18 +1,47 @@
 package router
 
 import (
+	"net/http"
+
 	"github.com/faruqputraaa/go-ticket/internal/http/handler"
 	"github.com/faruqputraaa/go-ticket/pkg/route"
-	"net/http"
 )
 
-func PublicRoutes(userHandler handler.UserHandler, ticketHandler handler.TicketHandler, eventHandler handler.EventHandler) []route.Route {
+var (
+	adminOnly= []string{"Administrator"}
+	//userOnly = []string{"User"}
+	allRoles = []string{"Administrator", "User"}
+)
+
+func PublicRoutes(
+	userHandler handler.UserHandler,
+	ticketHandler handler.TicketHandler,
+	eventHandler handler.EventHandler,
+	) []route.Route {
 	return []route.Route{
 		{
 			Method:  http.MethodPost,
 			Path:    "/login",
 			Handler: userHandler.Login,
 		},
+		{
+			Method:  http.MethodPost,
+			Path:    "/register",
+			Handler: userHandler.Register,
+		},
+
+		/*		{
+			Method: http.MethodPost,
+			Path:  "/reset-password",
+			Handler: userHandler.ResetPassword,
+		},
+		{
+			Method: http.MethodGet,
+			Path: "/verify-email/:token",
+			Handler: userHandler.VerifyEmail,
+		}, */
+
+
 		{
 			Method:  http.MethodPost,
 			Path:    "/ticket",
@@ -37,6 +66,41 @@ func PublicRoutes(userHandler handler.UserHandler, ticketHandler handler.TicketH
 
 }
 
-func PrivateRoutes() []route.Route {
-	return nil
+func PrivateRoutes(
+	userHandler handler.UserHandler,
+	ticketHandler handler.TicketHandler,
+	eventHandler handler.EventHandler,
+) []route.Route {
+	return []route.Route{
+		{
+			Method: http.MethodGet,
+			Path: "/users",
+			Handler: userHandler.GetUsers,
+			Roles: adminOnly,
+		},
+		{
+			Method: http.MethodGet,
+			Path: "/users/:id",
+			Handler: userHandler.GetUser,
+			Roles: adminOnly,
+		},
+		{
+			Method: http.MethodPost,
+			Path: "/users",
+			Handler: userHandler.CreateUser,
+			Roles: adminOnly,
+		},
+		{
+			Method: http.MethodPut,
+			Path: "/users/:id",
+			Handler: userHandler.UpdateUser,
+			Roles: adminOnly,
+		},
+		{
+			Method: http.MethodDelete,
+			Path: "/users/:id",
+			Handler: userHandler.DeleteUser,
+			Roles: adminOnly,
+		}, 
+	}
 }

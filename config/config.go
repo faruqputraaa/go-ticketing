@@ -11,7 +11,7 @@ type Config struct {
 	ENV            string         `env:"ENV" envDefault:"dev" mapstructure:"ENV"`
 	PORT           string         `env:"PORT" envDefault:"8080" mapstructure:"PORT"`
 	PostgresConfig PostgresConfig `envPrefix:"POSTGRES_" mapstructure:"POSTGRES"`
-	JWT            JWTConfig      `envPrefix:"JWT_" mapstructure:"JWT"`
+	JWTConfig            JWTConfig      `envPrefix:"JWT_" mapstructure:"JWT"`
 }
 
 type JWTConfig struct {
