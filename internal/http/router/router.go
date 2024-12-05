@@ -80,7 +80,7 @@ func PrivateRoutes(
 		},
 		{
 			Method: http.MethodGet,
-			Path: "/users/:id",
+			Path: "/users/:id_user",
 			Handler: userHandler.GetUser,
 			Roles: adminOnly,
 		},
@@ -92,13 +92,13 @@ func PrivateRoutes(
 		},
 		{
 			Method: http.MethodPut,
-			Path: "/users/:id",
+			Path: "/users/:id_user",
 			Handler: userHandler.UpdateUser,
 			Roles: adminOnly,
 		},
 		{
 			Method: http.MethodDelete,
-			Path: "/users/:id",
+			Path: "/users/:id_user",
 			Handler: userHandler.DeleteUser,
 			Roles: adminOnly,
 		}, 

@@ -44,7 +44,7 @@ func (r *userRepository) GetByUsername(ctx context.Context, username string) (*e
 func (r *userRepository) GetByID(ctx context.Context, id int) (*entity.User, error){
 	result := new(entity.User)
 
-	if err := r.db.WithContext(ctx).Where("id = ?", id).First(&result).Error; err != nil {
+	if err := r.db.WithContext(ctx).Where("id_user = ?", id).First(&result).Error; err != nil {
 		return nil, err
 	}
 

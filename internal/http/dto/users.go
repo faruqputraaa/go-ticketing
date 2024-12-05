@@ -11,7 +11,7 @@ type UserRegisterRequest struct {
 }
 
 type GetUserByRequest struct {
-	IDUser int `param:"id" validate:"required"`
+	IDUser int `param:"id_user" validate:"required"`
 }
 
 type CreateUserRequest struct {
@@ -21,7 +21,7 @@ type CreateUserRequest struct {
 }
 
 type UpdateUserRequest struct {
-	IDUser   int    `param:"id" validate:"required"`
+	IDUser   int    `param:"id_user" validate:"required"`
 	Username string `json:"username" validate:"required"`
 	Password string `json:"password" validate:"required"`
 	Role     string `json:"role" validate:"required"`
