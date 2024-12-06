@@ -2,6 +2,8 @@ package service
 
 import (
 	"context"
+	_ "errors"
+	"fmt"
 
 	"github.com/faruqputraaa/go-ticket/internal/entity"
 	"github.com/faruqputraaa/go-ticket/internal/http/dto"
@@ -33,6 +35,17 @@ func (s *ticketService) Create(ctx context.Context, req dto.CreateTicketRequest)
 		Category: req.Category,
 	}
 
+	// Periksa duplikasi berdasarkan IDEvent dan Category
+	existingTickets, err := s.ticketRepository.GetByIdEvent(ctx, ticket.IDEvent)
+	if err != nil {
+		return err
+	}
+	for _, t := range existingTickets {
+		if t.Category == ticket.Category {
+			return fmt.Errorf("ticket with category '%s' for event ID %d already exists", ticket.Category, ticket.IDEvent)
+		}
+	}
+	fmt.Printf("Creating ticket: %+v\n", ticket)
 	return s.ticketRepository.Create(ctx, ticket)
 }
 
