@@ -8,16 +8,15 @@ import (
 )
 
 var (
-	adminOnly= []string{"ADMIN"}
-	//userOnly = []string{"User"}
-	allRoles = []string{"ADMIN", "BUYER"}
+	adminOnly = []string{"ADMIN"}
+	allRoles  = []string{"ADMIN", "BUYER"}
 )
 
 func PublicRoutes(
 	userHandler handler.UserHandler,
 	ticketHandler handler.TicketHandler,
 	eventHandler handler.EventHandler,
-	) []route.Route {
+) []route.Route {
 	return []route.Route{
 		{
 			Method:  http.MethodPost,
@@ -31,16 +30,15 @@ func PublicRoutes(
 		},
 
 		/*		{
-			Method: http.MethodPost,
-			Path:  "/reset-password",
-			Handler: userHandler.ResetPassword,
-		},
-		{
-			Method: http.MethodGet,
-			Path: "/verify-email/:token",
-			Handler: userHandler.VerifyEmail,
-		}, */
-
+					Method: http.MethodPost,
+					Path:  "/reset-password",
+					Handler: userHandler.ResetPassword,
+				},
+				{
+					Method: http.MethodGet,
+					Path: "/verify-email/:token",
+					Handler: userHandler.VerifyEmail,
+				}, */
 
 		{
 			Method:  http.MethodPost,
@@ -70,37 +68,50 @@ func PrivateRoutes(
 	userHandler handler.UserHandler,
 	ticketHandler handler.TicketHandler,
 	eventHandler handler.EventHandler,
+	offerHandler handler.OfferHandler,
 ) []route.Route {
 	return []route.Route{
 		{
-			Method: http.MethodGet,
-			Path: "/users",
+			Method:  http.MethodGet,
+			Path:    "/users",
 			Handler: userHandler.GetUsers,
-			Roles: adminOnly,
+			Roles:   allRoles,
 		},
 		{
-			Method: http.MethodGet,
-			Path: "/users/:id_user",
+			Method:  http.MethodGet,
+			Path:    "/users/:id_user",
 			Handler: userHandler.GetUser,
-			Roles: adminOnly,
+			Roles:   adminOnly,
 		},
 		{
-			Method: http.MethodPost,
-			Path: "/users",
+			Method:  http.MethodPost,
+			Path:    "/users",
 			Handler: userHandler.CreateUser,
-			Roles: adminOnly,
+			Roles:   adminOnly,
 		},
 		{
-			Method: http.MethodPut,
-			Path: "/users/:id_user",
+			Method:  http.MethodPut,
+			Path:    "/users/:id_user",
 			Handler: userHandler.UpdateUser,
-			Roles: adminOnly,
+			Roles:   adminOnly,
 		},
 		{
-			Method: http.MethodDelete,
-			Path: "/users/:id_user",
+			Method:  http.MethodDelete,
+			Path:    "/users/:id_user",
 			Handler: userHandler.DeleteUser,
-			Roles: adminOnly,
-		}, 
+			Roles:   adminOnly,
+		},
+		{
+			Method:  http.MethodGet,
+			Path:    "/offers",
+			Handler: offerHandler.GetOffers,
+			Roles:   allRoles,
+		},
+		{
+			Method:  http.MethodPost,
+			Path:    "/offers",
+			Handler: offerHandler.CreateOffer,
+			Roles:   allRoles,
+		},
 	}
 }

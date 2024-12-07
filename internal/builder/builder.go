@@ -34,17 +34,20 @@ func BuildPrivateRoute(cfg *config.Config, db *gorm.DB) []route.Route {
 	userRepository := repository.NewUserRepository(db)
 	ticketRepository := repository.NewTicketRepository(db)
 	eventRepository := repository.NewEventRepository(db)
+	offerRepository := repository.NewOfferRepository(db)
 
 	//service
 	userService := service.NewUserService(userRepository)
 	tokenService := service.NewTokenService(cfg.JWTConfig.SecretKey)
 	ticketService := service.NewTicketService(ticketRepository)
 	eventService := service.NewEventService(eventRepository)
+	offerService := service.NewOfferService(offerRepository)
 
 	//handler
 	userHandler := handler.NewUserHandler(tokenService, userService)
 	ticketHandler := handler.NewTicketHandler(ticketService)
 	eventHandler := handler.NewEventHandler(eventService)
+	offerHandler := handler.NewOfferHandler(offerService, cfg)
 
-	return router.PrivateRoutes(userHandler, ticketHandler, eventHandler)
+	return router.PrivateRoutes(userHandler, ticketHandler, eventHandler, offerHandler)
 }

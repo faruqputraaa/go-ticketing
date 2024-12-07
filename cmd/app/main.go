@@ -25,7 +25,7 @@ func main() {
 	publicRoute := builder.BuildPublicRoute(cfg, db)
 	privateRoute := builder.BuildPrivateRoute(cfg, db)
 
-	srv := server.NewServer(cfg,publicRoute, privateRoute)
+	srv := server.NewServer(cfg, publicRoute, privateRoute)
 
 	runServer(srv, cfg.PORT)
 	waitForShutdown(srv)

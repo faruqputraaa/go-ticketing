@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS offers(
     email VARCHAR(255) NOT NULL,
     name_event VARCHAR(255) NOT NULL,
     description TEXT NOT NULL,
+    status VARCHAR(255) NOT NULL,
 
     FOREIGN KEY (id_user) REFERENCES users(id_user)
 );
