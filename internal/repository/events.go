@@ -36,7 +36,7 @@ func (r *eventRepository) GetAll(ctx context.Context) ([]entity.Event, error) {
 // GetByID
 func (r *eventRepository) GetByID(ctx context.Context, id int64) (*entity.Event, error) {
 	result := new(entity.Event)
-	if err := r.db.WithContext(ctx).First(&result).Error; err != nil {
+	if err := r.db.WithContext(ctx).Where("id_event = ?", id).First(&result).Error; err != nil {
 		return nil, err
 	}
 	return result, nil
@@ -54,5 +54,5 @@ func (r *eventRepository) Update(ctx context.Context, event *entity.Event) error
 
 // Delete
 func (r *eventRepository) Delete(ctx context.Context, event *entity.Event) error {
-	return r.db.WithContext(ctx).Delete(event).Error
+	return r.db.WithContext(ctx).Where("id_event = ?", event.IDEvent).Delete(&event).Error
 }

@@ -60,6 +60,21 @@ func PublicRoutes(
 			Path:    "/event",
 			Handler: eventHandler.CreateEvent,
 		},
+		{
+			Method:  http.MethodGet,
+			Path:    "/event/:id_event",
+			Handler: eventHandler.GetEvent,
+		},
+		{
+			Method:  http.MethodPut,
+			Path:    "/event/:id_event",
+			Handler: eventHandler.UpdateEvent,
+		},
+		{
+			Method:  http.MethodDelete,
+			Path:    "/event/:id_event",
+			Handler: eventHandler.DeleteEvent,
+		},
 	}
 
 }
