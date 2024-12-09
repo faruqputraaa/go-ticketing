@@ -52,6 +52,26 @@ func PublicRoutes(
 		},
 		{
 			Method:  http.MethodGet,
+			Path:    "/ticket/:id_ticket",
+			Handler: ticketHandler.GetTicket,
+		},
+		{
+			Method:  http.MethodGet,
+			Path:    "/ticket/:id_event",
+			Handler: ticketHandler.GetTicket,
+		},
+		{
+			Method:  http.MethodPut,
+			Path:    "/ticket/:id_ticket",
+			Handler: ticketHandler.UpdateTicket,
+		},
+		{
+			Method:  http.MethodDelete,
+			Path:    "/ticket/:id_ticket",
+			Handler: ticketHandler.DeleteTicket,
+		},
+		{
+			Method:  http.MethodGet,
 			Path:    "/event",
 			Handler: eventHandler.GetEvents,
 		},
