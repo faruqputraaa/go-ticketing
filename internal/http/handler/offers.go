@@ -1,9 +1,12 @@
 package handler
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/faruqputraaa/go-ticket/config"
+	"html/template"
 	"net/http"
+	"os"
 
 	"github.com/faruqputraaa/go-ticket/internal/http/dto"
 	"github.com/faruqputraaa/go-ticket/internal/service"
@@ -67,29 +70,54 @@ func (h *OfferHandler) CreateOffer(ctx echo.Context) error {
 		return ctx.JSON(http.StatusInternalServerError, response.ErrorResponse(http.StatusInternalServerError, err.Error()))
 	}
 
+	// Update the path to the template file (templates/email_template.html)
+	tmplPath := "templates/email_templates.html"
+	tmpl, err := os.ReadFile(tmplPath)
+	if err != nil {
+		// Print the full error to help debug the issue
+		return ctx.JSON(http.StatusInternalServerError, response.ErrorResponse(http.StatusInternalServerError, fmt.Sprintf("Failed to read email template from %s: %v", tmplPath, err)))
+	}
+
+	// Parsing the HTML template
+	t, err := template.New("offerEmail").Parse(string(tmpl))
+	if err != nil {
+		return ctx.JSON(http.StatusInternalServerError, response.ErrorResponse(http.StatusInternalServerError, fmt.Sprintf("Failed to parse email template: %v", err)))
+	}
+
+	// Prepare the data to be inserted into the template
+	data := struct {
+		NameEvent   string
+		Description string
+		Email       string
+	}{
+		NameEvent:   req.NameEvent,
+		Description: req.Description,
+		Email:       req.Email,
+	}
+
+	// Create a buffer to store the result of executing the template
+	var bodyBuffer bytes.Buffer
+
+	// Execute the template with the provided data
+	err = t.Execute(&bodyBuffer, data)
+	if err != nil {
+		return ctx.JSON(http.StatusInternalServerError, response.ErrorResponse(http.StatusInternalServerError, fmt.Sprintf("Failed to execute email template: %v", err)))
+	}
+
+	// Get the email body as a string from the buffer
+	body := bodyBuffer.String()
+
+	// Create the email
 	mail := gomail.NewMessage()
 	subject := fmt.Sprintf("Tawaran untuk membuat event konser yang diajukan oleh email : %s", req.Email)
 
-	mail.SetHeader("From", h.cfg.SMTPConfig.Email)  // Menggunakan h.cfg.SMTPConfig
-	mail.SetHeader("To", "gustipadaka19@gmail.com") // Ganti dengan penerima yang sesuai
+	mail.SetHeader("From", h.cfg.SMTPConfig.Email)  // Using SMTPConfig from your config
+	mail.SetHeader("To", "gustipadaka19@gmail.com") // Replace with the actual recipient
 	mail.SetHeader("Subject", subject)
 
-	body := fmt.Sprintf(`
-	==========================
-	  Tawaran Event Konser  
-	==========================
-	
-	Nama Event    : %s
-	Deskripsi     : %s
-	
-	
-	==========================
-	Terima kasih atas perhatian Anda.
-	`, req.NameEvent, req.Description)
+	mail.SetBody("text/html", body)
 
-	mail.SetBody("text/plain", body)
-
-	// Mengirim email menggunakan fungsi yang sudah dibuat
+	// Send the email
 	err = h.sendEmail(mail)
 	if err != nil {
 		return ctx.JSON(http.StatusInternalServerError, response.ErrorResponse(http.StatusInternalServerError, "Failed to send email"))
