@@ -142,7 +142,7 @@ func PrivateRoutes(
 		},
 		{
 			Method:  http.MethodPut,
-			Path:    "/reject/:id_offer",
+			Path:    "/offer/reject/:id_offer",
 			Handler: offerHandler.RejectOffer,
 			Roles:   allRoles,
 		},
