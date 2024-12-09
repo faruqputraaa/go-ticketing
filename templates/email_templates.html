@@ -7,7 +7,6 @@
         body { font-family: Arial, sans-serif; background-color: #f4f4f4; color: #333; padding: 20px; }
         .container { max-width: 600px; margin: 0 auto; background-color: #fff; padding: 20px; border-radius: 8px; }
         h2 { color: #2c3e50; }
-        .details { background-color: #ecf0f1; padding: 15px; margin-top: 20px; border-radius: 5px; }
         .footer { text-align: center; font-size: 12px; color: #7f8c8d; margin-top: 30px; }
         .button { display: inline-block; background-color: #3498db; color: white; padding: 10px 20px; border-radius: 5px; text-decoration: none; }
     </style>
@@ -16,19 +15,14 @@
 <div class="container">
     <h2>Tawaran Event Konser</h2>
     <p><strong>Nama Event:</strong> {{.NameEvent}}</p>
+    <p><strong>Pengaju:</strong> {{.Email}}</p>
     <p><strong>Deskripsi:</strong> {{.Description}}</p>
+    <p><strong>Status:</strong> {{.Status}}</p>
 
-    <div class="details">
-        <h3>Detail Tawaran:</h3>
-        <p>Email Pengaju: {{.Email}}</p>
-        <p>Deskripsi: {{.Description}}</p>
-    </div>
-
-    <a href="http://yourwebsite.com/offer-details/{{.NameEvent}}" class="button">Lihat Detail Tawaran</a>
 
     <div class="footer">
         <p>Terima kasih atas perhatian Anda!</p>
-        <p>&copy; 2024 Event Manager</p>
+        <p>&copy; 2024 Admin GoTicketing</p>
     </div>
 </div>
 </body>
