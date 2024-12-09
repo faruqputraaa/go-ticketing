@@ -70,8 +70,8 @@ func (h *OfferHandler) CreateOffer(ctx echo.Context) error {
 	mail := gomail.NewMessage()
 	subject := fmt.Sprintf("Tawaran untuk membuat event konser yang diajukan oleh email : %s", req.Email)
 
-	mail.SetHeader("From", h.cfg.SMTPConfig.Email) // Menggunakan h.cfg.SMTPConfig
-	mail.SetHeader("To", "fafaputra999@gmail.com") // Ganti dengan penerima yang sesuai
+	mail.SetHeader("From", h.cfg.SMTPConfig.Email)  // Menggunakan h.cfg.SMTPConfig
+	mail.SetHeader("To", "gustipadaka19@gmail.com") // Ganti dengan penerima yang sesuai
 	mail.SetHeader("Subject", subject)
 
 	body := fmt.Sprintf(`
@@ -98,16 +98,111 @@ func (h *OfferHandler) CreateOffer(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, response.SuccessResponse("Successfully created an offer", req))
 }
 
-func (h *OfferHandler) UpdateOffer(ctx echo.Context) error {
+func (h *OfferHandler) ApproveOffer(ctx echo.Context) error {
 	var req dto.UpdateOfferRequest
 	if err := ctx.Bind(&req); err != nil {
 		return ctx.JSON(http.StatusBadRequest, response.ErrorResponse(http.StatusBadRequest, err.Error()))
 	}
+
+	req.Status = "APPROVED"
 	err := h.offerService.Update(ctx.Request().Context(), req)
 	if err != nil {
 		return ctx.JSON(http.StatusInternalServerError, response.ErrorResponse(http.StatusInternalServerError, err.Error()))
 	}
-	return ctx.JSON(http.StatusOK, response.SuccessResponse("succesfuly update a offer", nil))
+
+	offer, err := h.offerService.GetByID(ctx.Request().Context(), req.IDOffer)
+	if err != nil {
+		return ctx.JSON(http.StatusInternalServerError, response.ErrorResponse(http.StatusInternalServerError, err.Error()))
+	}
+
+	if offer.Email == "" {
+		return ctx.JSON(http.StatusBadRequest, response.ErrorResponse(http.StatusBadRequest, "Email pada offer tidak valid"))
+	}
+
+	mail := gomail.NewMessage()
+	subject := fmt.Sprintf("Tawaran untuk membuat event konser yang diajukan oleh email: %s", offer.Email)
+
+	fromEmail := h.cfg.SMTPConfig.Email
+	if fromEmail == "" {
+		fromEmail = "defaultemail@example.com"
+	}
+
+	mail.SetHeader("From", fromEmail)
+	mail.SetHeader("To", offer.Email)
+	mail.SetHeader("Subject", subject)
+
+	body := fmt.Sprintf(`
+	==========================
+	  Tawaran Event Konser  
+	==========================
+
+	Nama Event    : %s
+	Deskripsi     : %s
+	Status        : %s
+
+	==========================
+	Terima kasih atas perhatian Anda.
+	`, offer.NameEvent, offer.Description, req.Status)
+
+	mail.SetBody("text/plain", body)
+
+	if err := h.sendEmail(mail); err != nil {
+		return ctx.JSON(http.StatusInternalServerError, response.ErrorResponse(http.StatusInternalServerError, "Failed to send email: "+err.Error()))
+	}
+
+	return ctx.JSON(http.StatusOK, response.SuccessResponse("Successfully updated the offer status to Approved and notified the user", nil))
+}
+
+func (h *OfferHandler) RejectOffer(ctx echo.Context) error {
+	var req dto.UpdateOfferRequest
+	if err := ctx.Bind(&req); err != nil {
+		return ctx.JSON(http.StatusBadRequest, response.ErrorResponse(http.StatusBadRequest, err.Error()))
+	}
+
+	req.Status = "REJECTED"
+	err := h.offerService.Update(ctx.Request().Context(), req)
+	if err != nil {
+		return ctx.JSON(http.StatusInternalServerError, response.ErrorResponse(http.StatusInternalServerError, err.Error()))
+	}
+
+	offer, err := h.offerService.GetByID(ctx.Request().Context(), req.IDOffer)
+	if err != nil {
+		return ctx.JSON(http.StatusInternalServerError, response.ErrorResponse(http.StatusInternalServerError, err.Error()))
+	}
+
+	if offer.Email == "" {
+		return ctx.JSON(http.StatusBadRequest, response.ErrorResponse(http.StatusBadRequest, "Email pada offer tidak valid"))
+	}
+
+	mail := gomail.NewMessage()
+	subject := fmt.Sprintf("Tawaran untuk membuat event konser yang diajukan oleh email: %s", offer.Email)
+
+	fromEmail := h.cfg.SMTPConfig.Email
+
+	mail.SetHeader("From", fromEmail)
+	mail.SetHeader("To", offer.Email)
+	mail.SetHeader("Subject", subject)
+
+	body := fmt.Sprintf(`
+	==========================
+	  Tawaran Event Konser  
+	==========================
+
+	Nama Event    : %s
+	Deskripsi     : %s
+	Status        : %s
+
+	==========================
+	Terima kasih atas perhatian Anda.
+	`, offer.NameEvent, offer.Description, req.Status)
+
+	mail.SetBody("text/plain", body)
+
+	if err := h.sendEmail(mail); err != nil {
+		return ctx.JSON(http.StatusInternalServerError, response.ErrorResponse(http.StatusInternalServerError, "Failed to send email: "+err.Error()))
+	}
+
+	return ctx.JSON(http.StatusOK, response.SuccessResponse("Successfully updated the offer status to Rejected and notified the user", nil))
 }
 
 func (h *OfferHandler) sendEmail(mail *gomail.Message) error {

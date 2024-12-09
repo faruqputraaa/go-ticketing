@@ -1,7 +1,7 @@
 package entity
 
 type User struct {
-	IDUser   int    `json:"id_user"`
+	IDUser   int    `json:"id_user" gorm:"autoIncrement;"`
 	Username string `json:"username"`
 	Email    string `json:"email"`
 	Password string `json:"-"`

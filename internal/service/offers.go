@@ -55,21 +55,15 @@ func (s *offerService) GetByIDUser(ctx context.Context, IDUser int64) ([]entity.
 }
 
 func (s *offerService) Update(ctx context.Context, req dto.UpdateOfferRequest) error {
+	// Ambil offer berdasarkan ID
 	offer, err := s.offerRepository.GetByID(ctx, req.IDOffer)
 	if err != nil {
 		return err
 	}
-	if req.IDUser != 0 {
-		offer.IDUser = req.IDUser
+
+	if req.Status != "" {
+		offer.Status = req.Status
 	}
-	if req.Email != "" {
-		offer.Email = req.Email
-	}
-	if req.NameEvent != "" {
-		offer.NameEvent = req.NameEvent
-	}
-	if req.Description != "" {
-		offer.Description = req.Description
-	}
+
 	return s.offerRepository.Update(ctx, offer)
 }
