@@ -47,7 +47,7 @@ func (r *offerRepository) Create(ctx context.Context, offer *entity.Offer) error
 
 func (r *offerRepository) Update(ctx context.Context, offer *entity.Offer) error {
 	return r.db.WithContext(ctx).
-		Where("id_offer = ?", offer.IDOffer). // Kondisi untuk memilih baris yang tepat
+		Where("id_offer = ?", offer.IDOffer).
 		Updates(offer).Error
 }
 
