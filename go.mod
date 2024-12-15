@@ -3,7 +3,6 @@ module github.com/faruqputraaa/go-ticket
 go 1.23.2
 
 require (
-	github.com/a-h/templ v0.2.793
 	github.com/caarlos0/env/v6 v6.10.1
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/joho/godotenv v1.5.1
