@@ -17,7 +17,7 @@ func BuildPublicRoute(cfg *config.Config, db *gorm.DB) []route.Route {
 	eventRepository := repository.NewEventRepository(db)
 
 	//service
-	userService := service.NewUserService(userRepository)
+	userService := service.NewUserService(cfg, userRepository)
 	tokenService := service.NewTokenService(cfg.JWTConfig.SecretKey)
 	ticketService := service.NewTicketService(ticketRepository)
 	eventService := service.NewEventService(eventRepository)
@@ -37,7 +37,7 @@ func BuildPrivateRoute(cfg *config.Config, db *gorm.DB) []route.Route {
 	offerRepository := repository.NewOfferRepository(db)
 
 	//service
-	userService := service.NewUserService(userRepository)
+	userService := service.NewUserService(cfg, userRepository)
 	tokenService := service.NewTokenService(cfg.JWTConfig.SecretKey)
 	ticketService := service.NewTicketService(ticketRepository)
 	eventService := service.NewEventService(eventRepository)

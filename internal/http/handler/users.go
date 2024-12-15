@@ -119,3 +119,42 @@ func (h *UserHandler) CreateUser(ctx echo.Context) error {
 
 		return ctx.JSON(http.StatusOK, response.SuccessResponse("success delete a user", nil))
 		}
+
+		func (h *UserHandler) ResetPassword(ctx echo.Context) error {
+			var req dto.ResetPasswordRequest
+			if err := ctx.Bind(&req); err != nil {
+				return ctx.JSON(http.StatusBadRequest, response.ErrorResponse(http.StatusBadRequest, err.Error()))
+			}
+
+			err := h.userService.ResetPassword(ctx.Request().Context(), req)
+			if err != nil {
+				return ctx.JSON(http.StatusInternalServerError, response.ErrorResponse(http.StatusInternalServerError, err.Error()))
+			}
+			return ctx.JSON(http.StatusOK, response.SuccessResponse("success reset password", nil))
+		}
+
+			func (h *UserHandler) ResetPasswordRequest(ctx echo.Context) error {
+			var req dto.RequestResetPassword
+			if err := ctx.Bind(&req); err != nil {
+				return ctx.JSON(http.StatusBadRequest, response.ErrorResponse(http.StatusBadRequest, err.Error()))
+			}
+
+			err :=h.userService.RequestResetPassword(ctx.Request().Context(), req.Email)
+			if err != nil {
+				return ctx.JSON(http.StatusInternalServerError, response.ErrorResponse(http.StatusInternalServerError, err.Error()))
+			}
+			return ctx.JSON(http.StatusOK, response.SuccessResponse("success request reset password check email", nil))
+		}
+
+			func (h *UserHandler) VerifyEmail(ctx echo.Context) error {
+			var req dto.VerifyEmailRequest
+			if err := ctx.Bind(&req); err != nil {
+				return ctx.JSON(http.StatusBadRequest, response.ErrorResponse(http.StatusBadRequest, err.Error()))
+			}
+
+			err := h.userService.VerifyEmail(ctx.Request().Context(), req)
+			if err != nil {
+				return ctx.JSON(http.StatusInternalServerError, response.ErrorResponse(http.StatusInternalServerError, err.Error()))
+			}
+			return ctx.JSON(http.StatusOK, response.SuccessResponse("success verify email", nil))
+		}

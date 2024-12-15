@@ -28,17 +28,21 @@ func PublicRoutes(
 			Path:    "/register",
 			Handler: userHandler.Register,
 		},
-
-		/*		{
-					Method: http.MethodPost,
-					Path:  "/reset-password",
-					Handler: userHandler.ResetPassword,
-				},
-				{
-					Method: http.MethodGet,
-					Path: "/verify-email/:token",
-					Handler: userHandler.VerifyEmail,
-				}, */
+		{
+			Method: http.MethodPost,
+			Path: "/request-reset-password",
+			Handler: userHandler.ResetPasswordRequest,
+		},
+		{
+			Method: http.MethodPost,
+			Path:  "/reset-password/:token",
+			Handler: userHandler.ResetPassword,
+		},
+		{
+			Method: http.MethodGet,
+			Path: "/verify-email/:token",
+			Handler: userHandler.VerifyEmail,
+		}, 
 
 		{
 			Method:  http.MethodPost,

@@ -10,6 +10,9 @@ import (
 type UserRepository interface {
 	GetAll(ctx context.Context) ([]entity.User, error)
 	GetByUsername(ctx context.Context, username string) (*entity.User, error)
+	GetByEmail(ctx context.Context, email string) (*entity.User, error)
+	GetByResetPasswordToken(ctx context.Context, token string) (*entity.User, error)
+	GetByVerifyEmailToken(ctx context.Context, token string) (*entity.User, error)
 	GetByID(ctx context.Context, id int) (*entity.User, error)
 	Create(ctx context.Context, user *entity.User) error
 	Update(ctx context.Context, user *entity.User) error
@@ -41,6 +44,24 @@ func (r *userRepository) GetByUsername(ctx context.Context, username string) (*e
 	return result, nil
 }
 
+
+func (r *userRepository) GetByEmail(ctx context.Context, email string) (*entity.User, error) {
+    result := new(entity.User)
+    if err := r.db.WithContext(ctx).Where("email = ?", email).First(&result).Error; err != nil {
+        return nil, err
+    }
+    return result, nil
+}
+
+
+
+
+
+
+
+
+
+
 func (r *userRepository) GetByID(ctx context.Context, id int) (*entity.User, error){
 	result := new(entity.User)
 
@@ -61,4 +82,24 @@ func (r *userRepository) Update(ctx context.Context, user *entity.User) error{
 
 func (r *userRepository) Delete(ctx context.Context, user *entity.User) error{
 	return r.db.WithContext(ctx).Delete(&user).Error
+}
+
+func (r *userRepository) GetByResetPasswordToken(ctx context.Context, token string) (*entity.User, error){
+	result := new(entity.User)
+
+	if err := r.db.WithContext(ctx).Where("reset_password_token = ?", token).First(&result).Error; err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
+func (u *userRepository) GetByVerifyEmailToken(ctx context.Context, token string) (*entity.User, error){
+	result := new(entity.User)
+
+	if err := u.db.WithContext(ctx).Where("verify_email_token = ?", token).First(&result).Error; err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
