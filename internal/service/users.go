@@ -25,20 +25,20 @@ type UserService interface {
 	Create(ctx context.Context, req dto.CreateUserRequest) error
 	Update(ctx context.Context, req dto.UpdateUserRequest) error
 	Delete(ctx context.Context, user *entity.User) error
-	ResetPassword (ctx context.Context, req dto.ResetPasswordRequest) error
-	RequestResetPassword (ctx context.Context, email string) error
-	VerifyEmail (ctx context.Context, req dto.VerifyEmailRequest) error
+	ResetPassword(ctx context.Context, req dto.ResetPasswordRequest) error
+	RequestResetPassword(ctx context.Context, email string) error
+	VerifyEmail(ctx context.Context, req dto.VerifyEmailRequest) error
 }
 
 type userService struct {
-	cfg *config.Config
+	cfg            *config.Config
 	userRepository repository.UserRepository
 }
 
 func NewUserService(
 	cfg *config.Config,
 	userRepository repository.UserRepository,
-	) UserService {
+) UserService {
 	return &userService{cfg, userRepository}
 }
 
@@ -87,25 +87,25 @@ func (s *userService) Register(ctx context.Context, req dto.UserRegisterRequest)
 	user.Password = string(hashedPassword)
 
 	err = s.userRepository.Create(ctx, user)
-		if err != nil {
+	if err != nil {
 		return err
 	}
-		templatePath := "./templates/email/verify-email.html"
-		tmpl, err := template.ParseFiles(templatePath)
-		if err != nil {
-			return err
-		}
+	templatePath := "./templates/email/verify-email.html"
+	tmpl, err := template.ParseFiles(templatePath)
+	if err != nil {
+		return err
+	}
 
-		var replacerEmail = struct {
-			Token string
-		} {
-			Token: user.VerifyEmailToken,
-		}
+	var replacerEmail = struct {
+		Token string
+	}{
+		Token: user.VerifyEmailToken,
+	}
 
-		var body bytes.Buffer
-		if err := tmpl.Execute(&body, replacerEmail); err != nil {
-			return err
-		}
+	var body bytes.Buffer
+	if err := tmpl.Execute(&body, replacerEmail); err != nil {
+		return err
+	}
 
 	m := gomail.NewMessage()
 	m.SetHeader("From", s.cfg.SMTPConfig.Email)
@@ -114,18 +114,18 @@ func (s *userService) Register(ctx context.Context, req dto.UserRegisterRequest)
 	m.SetBody("text/html", body.String())
 
 	d := gomail.NewDialer(
-		s.cfg.SMTPConfig.Host, 
-		s.cfg.SMTPConfig.Port, 
+		s.cfg.SMTPConfig.Host,
+		s.cfg.SMTPConfig.Port,
 		s.cfg.SMTPConfig.Email,
 		s.cfg.SMTPConfig.Password,
 	)
 
-// Send the email to Bob, Cora and Dan.
+	// Send the email to Bob, Cora and Dan.
 	if err := d.DialAndSend(m); err != nil {
 		return err
 	}
-		
-		return nil
+
+	return nil
 }
 
 func (s *userService) GetAll(ctx context.Context) ([]entity.User, error) {
@@ -185,7 +185,7 @@ func (s *userService) Delete(ctx context.Context, user *entity.User) error {
 
 func (s *userService) ResetPassword(ctx context.Context, req dto.ResetPasswordRequest) error {
 	// check user berdasarkan token reset password
-	user, err := s.userRepository.GetByResetPasswordToken(ctx, req.Token)		
+	user, err := s.userRepository.GetByResetPasswordToken(ctx, req.Token)
 	if err != nil {
 		return errors.New("token reset password salah")
 	}
@@ -196,31 +196,31 @@ func (s *userService) ResetPassword(ctx context.Context, req dto.ResetPasswordRe
 	}
 
 	user.Password = string(hashedPassword)
-	return s.userRepository.Update(ctx, user)	
+	return s.userRepository.Update(ctx, user)
 }
 
-	func (s *userService) RequestResetPassword(ctx context.Context, email string) error {
-		user ,err := s.userRepository.GetByEmail(ctx, email)
-		if err != nil {
-			return errors.New("email tidak ditemukan")
-		}
+func (s *userService) RequestResetPassword(ctx context.Context, email string) error {
+	user, err := s.userRepository.GetByEmail(ctx, email)
+	if err != nil {
+		return errors.New("email tidak ditemukan")
+	}
 
-		templatePath := "./templates/email/reset-password.html"
-		tmpl, err := template.ParseFiles(templatePath)
-		if err != nil {
-			return err
-		}
+	templatePath := "./templates/email/reset-password.html"
+	tmpl, err := template.ParseFiles(templatePath)
+	if err != nil {
+		return err
+	}
 
-		var replacerEmail = struct {
-			Token string
-		} {
-			Token: user.ResetPasswordToken,
-		}
+	var replacerEmail = struct {
+		Token string
+	}{
+		Token: user.ResetPasswordToken,
+	}
 
-		var body bytes.Buffer
-		if err := tmpl.Execute(&body, replacerEmail); err != nil {
-			return err
-		}
+	var body bytes.Buffer
+	if err := tmpl.Execute(&body, replacerEmail); err != nil {
+		return err
+	}
 
 	m := gomail.NewMessage()
 	m.SetHeader("From", s.cfg.SMTPConfig.Email)
@@ -229,18 +229,17 @@ func (s *userService) ResetPassword(ctx context.Context, req dto.ResetPasswordRe
 	m.SetBody("text/html", body.String())
 
 	d := gomail.NewDialer(
-		s.cfg.SMTPConfig.Host, 
-		s.cfg.SMTPConfig.Port, 
+		s.cfg.SMTPConfig.Host,
+		s.cfg.SMTPConfig.Port,
 		s.cfg.SMTPConfig.Email,
 		s.cfg.SMTPConfig.Password,
 	)
 
-// Send the email to Bob, Cora and Dan.
 	if err := d.DialAndSend(m); err != nil {
 		return err
 	}
-		
-		return nil
+
+	return nil
 }
 
 func (s *userService) VerifyEmail(ctx context.Context, req dto.VerifyEmailRequest) error {
@@ -252,4 +251,3 @@ func (s *userService) VerifyEmail(ctx context.Context, req dto.VerifyEmailReques
 	user.IsVerified = 1
 	return s.userRepository.Update(ctx, user)
 }
-
