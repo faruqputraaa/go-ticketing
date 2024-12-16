@@ -5,11 +5,10 @@ type GetOfferByIDRequest struct {
 }
 
 type GetOfferByIDUserRequest struct {
-	IDUser int64 `json:"id_user" validate:"required"`
+	IDUser int `json:"id_user" validate:"required"`
 }
 
 type CreateOfferRequest struct {
-	IDUser      int64  `json:"id_user" validate:"required"`
 	Email       string `json:"email" validate:"required"`
 	NameEvent   string `json:"name_event" validate:"required"`
 	Description string `json:"description" validate:"required"`

@@ -10,8 +10,7 @@ import (
 type OfferRepository interface {
 	GetAll(ctx context.Context) ([]entity.Offer, error)
 	GetByID(ctx context.Context, id int64) (*entity.Offer, error)
-	GetByIdUser(ctx context.Context, IDUser int64) ([]entity.Offer, error)
-
+	GetByIdUser(ctx context.Context, IDUser int) ([]entity.Offer, error)
 	Create(ctx context.Context, offer *entity.Offer) error
 	Update(ctx context.Context, offer *entity.Offer) error
 }
@@ -52,7 +51,7 @@ func (r *offerRepository) Update(ctx context.Context, offer *entity.Offer) error
 		Updates(offer).Error
 }
 
-func (r *offerRepository) GetByIdUser(ctx context.Context, IDUser int64) ([]entity.Offer, error) {
+func (r *offerRepository) GetByIdUser(ctx context.Context, IDUser int) ([]entity.Offer, error) {
 	var offers []entity.Offer
 	err := r.db.WithContext(ctx).Where("id_user = ?", IDUser).Find(&offers).Error
 	if err != nil {

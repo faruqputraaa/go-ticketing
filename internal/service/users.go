@@ -52,7 +52,7 @@ func (s *userService) Login(ctx context.Context, username string, password strin
 		return nil, errors.New("username atau password salah")
 	}
 
-		if user.IsVerified ==0 {
+	if user.IsVerified == 0 {
 		return nil, errors.New("email belum diverifikasi")
 	}
 
@@ -61,6 +61,7 @@ func (s *userService) Login(ctx context.Context, username string, password strin
 	claims := &entity.JWTCustomClaims{
 		Username: user.Username,
 		Role:     user.Role,
+		IDUser:   user.IDUser,
 		RegisteredClaims: jwt.RegisteredClaims{
 			Issuer:    "go-ticket",
 			ExpiresAt: jwt.NewNumericDate(expiredTime),

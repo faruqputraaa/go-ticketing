@@ -180,5 +180,11 @@ func PrivateRoutes(
 			Handler: offerHandler.RejectOffer,
 			Roles:   allRoles,
 		},
+		{
+			Method:  http.MethodGet,
+			Path:    "/offer/user",
+			Handler: offerHandler.GetOffersByIDUser,
+			Roles:   allRoles,
+		},
 	}
 }

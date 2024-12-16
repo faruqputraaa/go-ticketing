@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/faruqputraaa/go-ticket/config"
+	"github.com/faruqputraaa/go-ticket/internal/entity"
+	"github.com/golang-jwt/jwt/v5"
 	"html/template"
 	"net/http"
 	"os"
@@ -88,17 +90,17 @@ func (h *OfferHandler) GetOffer(ctx echo.Context) error {
 }
 
 func (h *OfferHandler) GetOffersByIDUser(ctx echo.Context) error {
-	var req dto.GetOfferByIDUserRequest
-	if err := ctx.Bind(&req); err != nil {
-		return h.errorResponse(ctx, http.StatusBadRequest, err.Error())
-	}
+	user := ctx.Get("user").(*jwt.Token)
+	claims := user.Claims.(*entity.JWTCustomClaims)
 
-	offers, err := h.offerService.GetByIDUser(ctx.Request().Context(), req.IDUser)
+	IDUser := claims.IDUser
+
+	offers, err := h.offerService.GetByIDUser(ctx.Request().Context(), IDUser)
 	if err != nil {
 		return h.errorResponse(ctx, http.StatusInternalServerError, err.Error())
 	}
 
-	return ctx.JSON(http.StatusOK, response.SuccessResponse("Successfully showing tickets by event ID", offers))
+	return ctx.JSON(http.StatusOK, response.SuccessResponse("Successfully showing offers by user ID", offers))
 }
 
 func (h *OfferHandler) CreateOffer(ctx echo.Context) error {
@@ -107,7 +109,7 @@ func (h *OfferHandler) CreateOffer(ctx echo.Context) error {
 		return h.errorResponse(ctx, http.StatusBadRequest, err.Error())
 	}
 
-	err := h.offerService.Create(ctx.Request().Context(), req)
+	err := h.offerService.Create(ctx, req)
 	if err != nil {
 		return h.errorResponse(ctx, http.StatusInternalServerError, err.Error())
 	}
