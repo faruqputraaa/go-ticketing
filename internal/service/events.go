@@ -14,6 +14,8 @@ type EventService interface {
 	GetByID(ctx context.Context, id int64) (*entity.Event, error)
 	Update(ctx context.Context, req dto.UpdateEventRequest) error
 	Delete(ctx context.Context, event *entity.Event) error
+	SearchByName(ctx context.Context, name string) ([]entity.Event, error)
+	SearchByLocation(ctx context.Context, location string) ([]entity.Event, error)
 }
 
 type eventService struct {
@@ -66,4 +68,12 @@ func (s *eventService) Update(ctx context.Context, req dto.UpdateEventRequest) e
 
 func (s *eventService) Delete(ctx context.Context, event *entity.Event) error {
 	return s.eventRepository.Delete(ctx, event)
+}
+
+func (s *eventService) SearchByName(ctx context.Context, name string) ([]entity.Event, error) {
+	return s.eventRepository.SearchByName(ctx, name)
+}
+
+func (s *eventService) SearchByLocation(ctx context.Context, location string) ([]entity.Event, error) {
+	return s.eventRepository.SearchByLocation(ctx, location)
 }

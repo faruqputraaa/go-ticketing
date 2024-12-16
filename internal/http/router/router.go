@@ -29,20 +29,20 @@ func PublicRoutes(
 			Handler: userHandler.Register,
 		},
 		{
-			Method: http.MethodPost,
-			Path: "/request-reset-password",
+			Method:  http.MethodPost,
+			Path:    "/request-reset-password",
 			Handler: userHandler.ResetPasswordRequest,
 		},
 		{
-			Method: http.MethodPost,
-			Path:  "/reset-password/:token",
+			Method:  http.MethodPost,
+			Path:    "/reset-password/:token",
 			Handler: userHandler.ResetPassword,
 		},
 		{
-			Method: http.MethodGet,
-			Path: "/verify-email/:token",
+			Method:  http.MethodGet,
+			Path:    "/verify-email/:token",
 			Handler: userHandler.VerifyEmail,
-		}, 
+		},
 
 		{
 			Method:  http.MethodPost,
@@ -98,6 +98,16 @@ func PublicRoutes(
 			Method:  http.MethodDelete,
 			Path:    "/event/:id_event",
 			Handler: eventHandler.DeleteEvent,
+		},
+		{
+			Method:  http.MethodGet,
+			Path:    "/event/search/name",
+			Handler: eventHandler.SearchByName,
+		},
+		{
+			Method:  http.MethodGet,
+			Path:    "/event/search/location",
+			Handler: eventHandler.SearchByLocation,
 		},
 	}
 

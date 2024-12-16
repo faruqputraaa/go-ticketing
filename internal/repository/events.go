@@ -13,6 +13,8 @@ type EventRepository interface {
 	Create(ctx context.Context, event *entity.Event) error
 	Update(ctx context.Context, event *entity.Event) error
 	Delete(ctx context.Context, event *entity.Event) error
+	SearchByName(ctx context.Context, name string) ([]entity.Event, error)
+	SearchByLocation(ctx context.Context, location string) ([]entity.Event, error)
 }
 
 type eventRepository struct {
@@ -55,4 +57,20 @@ func (r *eventRepository) Update(ctx context.Context, event *entity.Event) error
 // Delete
 func (r *eventRepository) Delete(ctx context.Context, event *entity.Event) error {
 	return r.db.WithContext(ctx).Where("id_event = ?", event.IDEvent).Delete(&event).Error
+}
+
+func (r *eventRepository) SearchByName(ctx context.Context, name string) ([]entity.Event, error) {
+	var events []entity.Event
+	if err := r.db.WithContext(ctx).Where("name LIKE ?", "%"+name+"%").Find(&events).Error; err != nil {
+		return nil, err
+	}
+	return events, nil
+}
+
+func (r *eventRepository) SearchByLocation(ctx context.Context, location string) ([]entity.Event, error) {
+	var events []entity.Event
+	if err := r.db.WithContext(ctx).Where("location LIKE ?", "%"+location+"%").Find(&events).Error; err != nil {
+		return nil, err
+	}
+	return events, nil
 }
