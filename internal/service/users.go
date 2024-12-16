@@ -52,6 +52,10 @@ func (s *userService) Login(ctx context.Context, username string, password strin
 		return nil, errors.New("username atau password salah")
 	}
 
+		if user.IsVerified ==0 {
+		return nil, errors.New("email belum diverifikasi")
+	}
+
 	expiredTime := time.Now().Add(time.Hour * 10)
 
 	claims := &entity.JWTCustomClaims{
