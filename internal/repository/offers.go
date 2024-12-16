@@ -35,6 +35,7 @@ func (r *offerRepository) GetAll(ctx context.Context) ([]entity.Offer, error) {
 
 func (r *offerRepository) GetByID(ctx context.Context, id int64) (*entity.Offer, error) {
 	result := new(entity.Offer)
+
 	if err := r.db.WithContext(ctx).Where("id_offer = ?", id).First(&result).Error; err != nil {
 		return nil, err
 	}
