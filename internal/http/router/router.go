@@ -45,36 +45,6 @@ func PublicRoutes(
 		},
 
 		{
-			Method:  http.MethodPost,
-			Path:    "/ticket",
-			Handler: ticketHandler.CreateTicket,
-		},
-		{
-			Method:  http.MethodGet,
-			Path:    "/ticket",
-			Handler: ticketHandler.GetTickets,
-		},
-		{
-			Method:  http.MethodGet,
-			Path:    "/ticket/:id_ticket",
-			Handler: ticketHandler.GetTicket,
-		},
-		{
-			Method:  http.MethodGet,
-			Path:    "/ticket/:id_event",
-			Handler: ticketHandler.GetTicket,
-		},
-		{
-			Method:  http.MethodPut,
-			Path:    "/ticket/:id_ticket",
-			Handler: ticketHandler.UpdateTicket,
-		},
-		{
-			Method:  http.MethodDelete,
-			Path:    "/ticket/:id_ticket",
-			Handler: ticketHandler.DeleteTicket,
-		},
-		{
 			Method:  http.MethodGet,
 			Path:    "/event",
 			Handler: eventHandler.GetEvents,
@@ -184,6 +154,42 @@ func PrivateRoutes(
 			Method:  http.MethodGet,
 			Path:    "/offer/user",
 			Handler: offerHandler.GetOffersByIDUser,
+			Roles:   allRoles,
+		},
+		{
+			Method:  http.MethodPost,
+			Path:    "/ticket",
+			Handler: ticketHandler.CreateTicket,
+			Roles:   allRoles,
+		},
+		{
+			Method:  http.MethodGet,
+			Path:    "/ticket",
+			Handler: ticketHandler.GetTickets,
+			Roles:   allRoles,
+		},
+		{
+			Method:  http.MethodGet,
+			Path:    "/ticket/:id_ticket",
+			Handler: ticketHandler.GetTicket,
+			Roles:   allRoles,
+		},
+		{
+			Method:  http.MethodGet,
+			Path:    "/ticket/:id_event",
+			Handler: ticketHandler.GetTicket,
+			Roles:   allRoles,
+		},
+		{
+			Method:  http.MethodPut,
+			Path:    "/ticket/:id_ticket",
+			Handler: ticketHandler.UpdateTicket,
+			Roles:   allRoles,
+		},
+		{
+			Method:  http.MethodDelete,
+			Path:    "/ticket/:id_ticket",
+			Handler: ticketHandler.DeleteTicket,
 			Roles:   allRoles,
 		},
 	}
