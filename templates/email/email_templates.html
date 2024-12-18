@@ -1,53 +1,117 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <style>
-      body {
-        font-family: Arial, sans-serif;
-        background-color: #f4f4f4;
-        color: #333;
-        padding: 20px;
-      }
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #e9f2f7;
+      color: #333;
+      padding: 30px;
+      margin: 0;
+    }
+    .container {
+      max-width: 700px;
+      margin: 0 auto;
+      background-color: #ffffff;
+      padding: 40px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    h2 {
+      font-size: 28px;
+      color: #2c3e50;
+      margin-bottom: 20px;
+    }
+    .content p {
+      font-size: 16px;
+      margin-bottom: 10px;
+      line-height: 1.6;
+    }
+    .content p strong {
+      color: #2980b9;
+    }
+    .status {
+      display: inline-block;
+      padding: 8px 16px;
+      border-radius: 5px;
+      font-weight: bold;
+      color: #fff;
+    }
+    .status.pending {
+      background-color: #f39c12;
+    }
+    .status.approved {
+      background-color: #27ae60;
+    }
+    .status.rejected {
+      background-color: #e74c3c;
+    }
+    .footer {
+      text-align: center;
+      font-size: 14px;
+      color: #7f8c8d;
+      margin-top: 40px;
+      padding-top: 20px;
+      border-top: 1px solid #ddd;
+    }
+    .footer p {
+      margin: 0;
+    }
+    .button {
+      display: inline-block;
+      background-color: #3498db;
+      color: white;
+      padding: 12px 25px;
+      border-radius: 5px;
+      text-decoration: none;
+      font-size: 16px;
+      font-weight: bold;
+      margin-top: 20px;
+    }
+    .button:hover {
+      background-color: #2980b9;
+    }
+    /* Responsiveness */
+    @media (max-width: 600px) {
       .container {
-        max-width: 600px;
-        margin: 0 auto;
-        background-color: #fff;
         padding: 20px;
-        border-radius: 8px;
       }
       h2 {
-        color: #2c3e50;
+        font-size: 24px;
       }
-      .footer {
-        text-align: center;
-        font-size: 12px;
-        color: #7f8c8d;
-        margin-top: 30px;
+      .content p {
+        font-size: 14px;
       }
       .button {
-        display: inline-block;
-        background-color: #3498db;
-        color: white;
         padding: 10px 20px;
-        border-radius: 5px;
-        text-decoration: none;
+        font-size: 14px;
       }
-    </style>
-  </head>
-  <body>
-    <div class="container">
-      <h2>Tawaran Event Konser</h2>
-      <p><strong>Nama Event:</strong> {{.NameEvent}}</p>
-      <p><strong>Pengaju:</strong> {{.Email}}</p>
-      <p><strong>Deskripsi:</strong> {{.Description}}</p>
-      <p><strong>Status:</strong> {{.Status}}</p>
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h2>Tawaran Event Konser</h2>
+  <div class="content">
+    <p><strong>Nama Event:</strong> {{.NameEvent}}</p>
+    <p><strong>Pengaju:</strong> {{.Email}}</p>
+    <p><strong>Deskripsi:</strong> {{.Description}}</p>
+    <p><strong>Status:</strong>
+      <span class="status {{.Status}}">
+            {{.Status}}
+          </span>
+    </p>
+  </div>
 
-      <div class="footer">
-        <p>Terima kasih atas perhatian Anda!</p>
-        <p>&copy; 2024 Admin GoTicketing</p>
-      </div>
-    </div>
-  </body>
+  <!-- Optional Button to take action -->
+  <a href="#" class="button">Lihat Detail Tawaran</a>
+
+  <div class="footer">
+    <p>Terima kasih atas perhatian Anda!</p>
+    <p>&copy; 2024 Admin GoTicketing</p>
+  </div>
+</div>
+</body>
 </html>

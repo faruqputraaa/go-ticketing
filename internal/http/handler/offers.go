@@ -31,6 +31,7 @@ func (h *OfferHandler) errorResponse(ctx echo.Context, status int, message strin
 }
 
 func (h *OfferHandler) sendOfferEmail(offer dto.CreateOfferRequest, subject string, status string, toEmail string) error {
+
 	tmplPath := "templates/email/email_templates.html"
 	tmpl, err := os.ReadFile(tmplPath)
 	if err != nil {
