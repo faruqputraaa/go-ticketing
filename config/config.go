@@ -13,6 +13,7 @@ type Config struct {
 	PostgresConfig PostgresConfig `envPrefix:"POSTGRES_" mapstructure:"POSTGRES"`
 	JWTConfig      JWTConfig      `envPrefix:"JWT_" mapstructure:"JWT"`
 	SMTPConfig     SMTPConfig     `envPrefix:"SMTP_" mapstructure:"SMTP"`
+	MidtransConfig MidtransConfig `envPrefix:"MIDTRANS_" mapstructure:"MIDTRANS"`
 }
 
 type JWTConfig struct {
@@ -32,6 +33,10 @@ type SMTPConfig struct {
 	Port     int    `env:"PORT" envDefault:"465" mapstructure:"PORT"`
 	Email    string `env:"EMAIL" envDefault:"support@gmail.com" mapstructure:"EMAIL"`
 	Password string `env:"PASSWORD" envDefault:"password" mapstructure:"PASSWORD"`
+}
+
+type MidtransConfig struct {
+	Serverkey string `env:"SERVERKEY" envDefault:"serverkey" mapstructure:"SERVERKEY"`
 }
 
 func NewConfig(envPath string) (*Config, error) {

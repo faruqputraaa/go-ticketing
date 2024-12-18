@@ -4,11 +4,14 @@ import (
 	"context"
 	"errors"
 	_ "errors"
+	"github.com/faruqputraaa/go-ticket/config"
 	"github.com/faruqputraaa/go-ticket/internal/entity"
 	"github.com/faruqputraaa/go-ticket/internal/http/dto"
 	"github.com/faruqputraaa/go-ticket/internal/repository"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
+	"github.com/midtrans/midtrans-go"
+	"github.com/midtrans/midtrans-go/snap"
 )
 
 type TransactionService interface {
@@ -20,11 +23,12 @@ type TransactionService interface {
 }
 
 type transactionService struct {
+	cfg                   *config.Config
 	transactionRepository repository.TransactionRepository
 }
 
-func NewTransactionService(transactionRepository repository.TransactionRepository) TransactionService {
-	return &transactionService{transactionRepository}
+func NewTransactionService(cfg *config.Config, transactionRepository repository.TransactionRepository) TransactionService {
+	return &transactionService{cfg, transactionRepository}
 }
 
 func (s *transactionService) Create(ctx echo.Context, req dto.CreateTransactionRequest) error {
@@ -35,13 +39,16 @@ func (s *transactionService) Create(ctx echo.Context, req dto.CreateTransactionR
 		return errors.New("email is required")
 	}
 
-	offer := &entity.Transaction{
+	transaction := &entity.Transaction{
 		IDUser:         claims.IDUser,
 		IDTicket:       req.IDTicket,
 		QuantityTicket: req.QuantityTicket,
 	}
 
-	return s.transactionRepository.Create(ctx.Request().Context(), offer)
+	var sn = snap.Client{}
+	sn.New(s.cfg.MidtransConfig.Serverkey, midtrans.Sandbox)
+
+	return s.transactionRepository.Create(ctx.Request().Context(), transaction)
 }
 
 // GetAll implements TicketService.
