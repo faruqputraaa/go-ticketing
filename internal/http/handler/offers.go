@@ -26,21 +26,17 @@ func NewOfferHandler(offerService service.OfferService, cfg *config.Config) Offe
 	return OfferHandler{offerService, cfg}
 }
 
-func (h *OfferHandler) errorResponse(ctx echo.Context, status int, message string) error {
-	return ctx.JSON(status, response.ErrorResponse(status, message))
-}
-
-func (h *OfferHandler) sendOfferEmail(offer dto.CreateOfferRequest, subject string, status string, toEmail string) error {
+func (h *OfferHandler) sendOfferEmail(offer dto.CreateOfferRequest, subject string, status string, toEmail string, ctx echo.Context) error {
 
 	tmplPath := "templates/email/email_templates.html"
 	tmpl, err := os.ReadFile(tmplPath)
 	if err != nil {
-		return h.errorResponse(nil, http.StatusInternalServerError, fmt.Sprintf("Failed to read email template: %v", err))
+		return ctx.JSON(http.StatusInternalServerError, response.ErrorResponse(http.StatusInternalServerError, fmt.Sprintf("Failed to read email template: %v", err)))
 	}
 
 	t, err := template.New("offerEmail").Parse(string(tmpl))
 	if err != nil {
-		return h.errorResponse(nil, http.StatusInternalServerError, fmt.Sprintf("Failed to parse email template: %v", err))
+		return ctx.JSON(http.StatusInternalServerError, response.ErrorResponse(http.StatusInternalServerError, fmt.Sprintf("Failed to parse email template: %v", err)))
 	}
 
 	data := struct {
@@ -58,7 +54,7 @@ func (h *OfferHandler) sendOfferEmail(offer dto.CreateOfferRequest, subject stri
 	var bodyBuffer bytes.Buffer
 	err = t.Execute(&bodyBuffer, data)
 	if err != nil {
-		return h.errorResponse(nil, http.StatusInternalServerError, fmt.Sprintf("Failed to execute email template: %v", err))
+		return ctx.JSON(http.StatusInternalServerError, response.ErrorResponse(http.StatusInternalServerError, fmt.Sprintf("Failed to execute email template: %v", err)))
 	}
 
 	mail := gomail.NewMessage()
@@ -73,7 +69,7 @@ func (h *OfferHandler) sendOfferEmail(offer dto.CreateOfferRequest, subject stri
 func (h *OfferHandler) GetOffers(ctx echo.Context) error {
 	offers, err := h.offerService.GetAll(ctx.Request().Context())
 	if err != nil {
-		return h.errorResponse(ctx, http.StatusInternalServerError, err.Error())
+		return ctx.JSON(http.StatusInternalServerError, response.ErrorResponse(http.StatusInternalServerError, fmt.Sprintf("Failed to get all offers: %v", err)))
 	}
 	return ctx.JSON(http.StatusOK, response.SuccessResponse("Successfully showing all tickets", offers))
 }
@@ -81,11 +77,11 @@ func (h *OfferHandler) GetOffers(ctx echo.Context) error {
 func (h *OfferHandler) GetOffer(ctx echo.Context) error {
 	var req dto.GetOfferByIDRequest
 	if err := ctx.Bind(&req); err != nil {
-		return h.errorResponse(ctx, http.StatusBadRequest, err.Error())
+		return ctx.JSON(http.StatusBadRequest, response.ErrorResponse(http.StatusBadRequest, fmt.Sprintf("Failed to parse request body: %v", err)))
 	}
 	offer, err := h.offerService.GetByID(ctx.Request().Context(), req.IDOffer)
 	if err != nil {
-		return h.errorResponse(ctx, http.StatusInternalServerError, err.Error())
+		return ctx.JSON(http.StatusInternalServerError, response.ErrorResponse(http.StatusInternalServerError, fmt.Sprintf("Failed to get offer: %v", err)))
 	}
 	return ctx.JSON(http.StatusOK, response.SuccessResponse("Successfully showing an offer", offer))
 }
@@ -98,7 +94,7 @@ func (h *OfferHandler) GetOffersByIDUser(ctx echo.Context) error {
 
 	offers, err := h.offerService.GetByIDUser(ctx.Request().Context(), IDUser)
 	if err != nil {
-		return h.errorResponse(ctx, http.StatusInternalServerError, err.Error())
+		return ctx.JSON(http.StatusInternalServerError, response.ErrorResponse(http.StatusInternalServerError, fmt.Sprintf("Failed to get offer: %v", err)))
 	}
 
 	return ctx.JSON(http.StatusOK, response.SuccessResponse("Successfully showing offers by user ID", offers))
@@ -107,17 +103,17 @@ func (h *OfferHandler) GetOffersByIDUser(ctx echo.Context) error {
 func (h *OfferHandler) CreateOffer(ctx echo.Context) error {
 	var req dto.CreateOfferRequest
 	if err := ctx.Bind(&req); err != nil {
-		return h.errorResponse(ctx, http.StatusBadRequest, err.Error())
+		return ctx.JSON(http.StatusInternalServerError, response.ErrorResponse(http.StatusInternalServerError, fmt.Sprintf("Failed to parse body: %v", err)))
 	}
 
 	err := h.offerService.Create(ctx, req)
 	if err != nil {
-		return h.errorResponse(ctx, http.StatusInternalServerError, err.Error())
+		return ctx.JSON(http.StatusInternalServerError, response.ErrorResponse(http.StatusInternalServerError, fmt.Sprintf("Failed to create offer: %v", err)))
 	}
 
 	subject := fmt.Sprintf("Tawaran untuk membuat event konser yang diajukan oleh email : %s", req.Email)
-	if err := h.sendOfferEmail(req, subject, "PENDING", "fafaputra999@gmail.com"); err != nil {
-		return h.errorResponse(ctx, http.StatusInternalServerError, "Failed to send email to admin")
+	if err := h.sendOfferEmail(req, subject, "PENDING", "fafaputra999@gmail.com", nil); err != nil {
+		return ctx.JSON(http.StatusInternalServerError, response.ErrorResponse(http.StatusInternalServerError, "Failed to send email to admin"))
 	}
 
 	return ctx.JSON(http.StatusOK, response.SuccessResponse("Successfully created an offer", req))
@@ -126,21 +122,21 @@ func (h *OfferHandler) CreateOffer(ctx echo.Context) error {
 func (h *OfferHandler) updateOfferStatus(ctx echo.Context, status string) error {
 	var req dto.UpdateOfferRequest
 	if err := ctx.Bind(&req); err != nil {
-		return h.errorResponse(ctx, http.StatusBadRequest, err.Error())
+		return ctx.JSON(http.StatusBadRequest, response.ErrorResponse(http.StatusBadRequest, fmt.Sprintf("Failed to parse body: %v", err)))
 	}
 	req.Status = status
 	err := h.offerService.Update(ctx.Request().Context(), req)
 	if err != nil {
-		return h.errorResponse(ctx, http.StatusInternalServerError, err.Error())
+		return ctx.JSON(http.StatusInternalServerError, response.ErrorResponse(http.StatusInternalServerError, fmt.Sprintf("Failed to update offer: %v", err)))
 	}
 
 	offer, err := h.offerService.GetByID(ctx.Request().Context(), req.IDOffer)
 	if err != nil {
-		return h.errorResponse(ctx, http.StatusInternalServerError, err.Error())
+		return ctx.JSON(http.StatusInternalServerError, response.ErrorResponse(http.StatusInternalServerError, fmt.Sprintf("Failed to get offer: %v", err)))
 	}
 
 	if offer.Email == "" {
-		return h.errorResponse(ctx, http.StatusBadRequest, "Invalid email on offer")
+		return ctx.JSON(http.StatusInternalServerError, response.ErrorResponse(http.StatusInternalServerError, fmt.Sprintf("Failed to get offer: %v", err)))
 	}
 
 	offerDTO := dto.CreateOfferRequest{
@@ -150,8 +146,8 @@ func (h *OfferHandler) updateOfferStatus(ctx echo.Context, status string) error 
 	}
 
 	subject := fmt.Sprintf("Tawaran untuk membuat event konser yang diajukan oleh email: %s", offer.Email)
-	if err := h.sendOfferEmail(offerDTO, subject, status, offer.Email); err != nil {
-		return h.errorResponse(ctx, http.StatusInternalServerError, "Failed to send email to user")
+	if err := h.sendOfferEmail(offerDTO, subject, status, offer.Email, ctx); err != nil {
+		return ctx.JSON(http.StatusInternalServerError, response.ErrorResponse(http.StatusInternalServerError, "Failed to send email to user"))
 	}
 
 	return ctx.JSON(http.StatusOK, response.SuccessResponse("Successfully updated offer status and notified the user", nil))
