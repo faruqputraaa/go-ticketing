@@ -9,10 +9,12 @@ import (
 
 type TransactionRepository interface {
 	GetAll(ctx context.Context) ([]entity.Transaction, error)
-	GetByID(ctx context.Context, id int64) (*entity.Transaction, error)
+	GetByID(ctx context.Context, id string) (*entity.Transaction, error)
 	GetByIdUser(ctx context.Context, IDUser int) ([]entity.Transaction, error)
 	Create(ctx context.Context, transaction *entity.Transaction) error
 	Update(ctx context.Context, transaction *entity.Transaction) error
+	GetTicketByID(ctx context.Context, id int64) (*entity.Ticket, error)
+	CreateLogTransaction(ctx context.Context, log *entity.TransactionLog) error
 }
 
 type transactionRepository struct {
@@ -32,7 +34,7 @@ func (r *transactionRepository) GetAll(ctx context.Context) ([]entity.Transactio
 	return result, nil
 }
 
-func (r *transactionRepository) GetByID(ctx context.Context, id int64) (*entity.Transaction, error) {
+func (r *transactionRepository) GetByID(ctx context.Context, id string) (*entity.Transaction, error) {
 	result := new(entity.Transaction)
 
 	if err := r.db.WithContext(ctx).Where("id_transaction = ?", id).First(&result).Error; err != nil {
@@ -43,6 +45,15 @@ func (r *transactionRepository) GetByID(ctx context.Context, id int64) (*entity.
 
 func (r *transactionRepository) Create(ctx context.Context, transaction *entity.Transaction) error {
 	return r.db.WithContext(ctx).Create(transaction).Error
+}
+
+func (r *transactionRepository) GetTicketByID(ctx context.Context, id int64) (*entity.Ticket, error) {
+	result := new(entity.Ticket)
+
+	if err := r.db.WithContext(ctx).Where("id_ticket = ?", id).First(&result).Error; err != nil {
+		return nil, err
+	}
+	return result, nil
 }
 
 func (r *transactionRepository) Update(ctx context.Context, transaction *entity.Transaction) error {
@@ -58,4 +69,8 @@ func (r *transactionRepository) GetByIdUser(ctx context.Context, IDUser int) ([]
 		return nil, err
 	}
 	return transaction, nil
+}
+
+func (r *transactionRepository) CreateLogTransaction(ctx context.Context, log *entity.TransactionLog) error {
+	return r.db.WithContext(ctx).Create(log).Error
 }

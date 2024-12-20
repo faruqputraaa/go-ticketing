@@ -1,0 +1,5 @@
+BEGIN;
+
+DROP TABLE IF EXISTS transaction_log;
+
+COMMIT;

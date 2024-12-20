@@ -88,6 +88,7 @@ func PrivateRoutes(
 	ticketHandler handler.TicketHandler,
 	eventHandler handler.EventHandler,
 	offerHandler handler.OfferHandler,
+	transactionHandler handler.TransactionHandler,
 ) []route.Route {
 	return []route.Route{
 		{
@@ -190,6 +191,30 @@ func PrivateRoutes(
 			Method:  http.MethodDelete,
 			Path:    "/ticket/:id_ticket",
 			Handler: ticketHandler.DeleteTicket,
+			Roles:   allRoles,
+		},
+		{
+			Method:  http.MethodPost,
+			Path:    "/transaction",
+			Handler: transactionHandler.CreateTransaction,
+			Roles:   allRoles,
+		},
+		{
+			Method:  http.MethodGet,
+			Path:    "/transactions",
+			Handler: transactionHandler.GetTransactions,
+			Roles:   adminOnly,
+		},
+		{
+			Method:  http.MethodGet,
+			Path:    "/transaction",
+			Handler: transactionHandler.GetTransaction,
+			Roles:   adminOnly,
+		},
+		{
+			Method:  http.MethodGet,
+			Path:    "/transaction/user",
+			Handler: transactionHandler.GetTransactionByIDUser,
 			Roles:   allRoles,
 		},
 	}

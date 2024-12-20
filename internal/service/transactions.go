@@ -2,23 +2,22 @@ package service
 
 import (
 	"context"
-	"errors"
 	_ "errors"
+	"fmt"
 	"github.com/faruqputraaa/go-ticket/config"
 	"github.com/faruqputraaa/go-ticket/internal/entity"
 	"github.com/faruqputraaa/go-ticket/internal/http/dto"
 	"github.com/faruqputraaa/go-ticket/internal/repository"
-	"github.com/golang-jwt/jwt/v5"
-	"github.com/labstack/echo/v4"
 	"github.com/midtrans/midtrans-go"
 	"github.com/midtrans/midtrans-go/snap"
+	"time"
 )
 
 type TransactionService interface {
 	GetAll(ctx context.Context) ([]entity.Transaction, error)
-	GetByID(ctx context.Context, id int64) (*entity.Transaction, error)
+	GetByID(ctx context.Context, id string) (*entity.Transaction, error)
 	GetByIDUser(ctx context.Context, IDUser int) ([]entity.Transaction, error)
-	Create(ctx echo.Context, req dto.CreateTransactionRequest) error
+	Create(ctx context.Context, req dto.CreateTransactionRequest, claims *entity.JWTCustomClaims) (*entity.Transaction, *snap.Response, error)
 	Update(ctx context.Context, transaction dto.UpdateTransactionRequest) error
 }
 
@@ -31,24 +30,56 @@ func NewTransactionService(cfg *config.Config, transactionRepository repository.
 	return &transactionService{cfg, transactionRepository}
 }
 
-func (s *transactionService) Create(ctx echo.Context, req dto.CreateTransactionRequest) error {
-	user := ctx.Get("user").(*jwt.Token)
-	claims := user.Claims.(*entity.JWTCustomClaims)
-
-	if req.QuantityTicket == 0 {
-		return errors.New("email is required")
+func (s *transactionService) Create(ctx context.Context, req dto.CreateTransactionRequest, claims *entity.JWTCustomClaims) (*entity.Transaction, *snap.Response, error) {
+	if req.QuantityTicket <= 0 {
+		return nil, nil, fmt.Errorf("Quantity of tickets must be greater than 0")
 	}
 
-	transaction := &entity.Transaction{
+	if req.IDTicket == 0 {
+		return nil, nil, fmt.Errorf("ID ticket is required")
+	}
+
+	ticket, err := s.transactionRepository.GetTicketByID(ctx, req.IDTicket)
+	if err != nil {
+		return nil, nil, fmt.Errorf("Ticket not found")
+	}
+
+	amount := float64(ticket.Price) * float64(req.QuantityTicket)
+	transactionID := fmt.Sprintf("TRX-%d", time.Now().Unix())
+
+	newTransaction := &entity.Transaction{
+		IDTransaction:  transactionID,
 		IDUser:         claims.IDUser,
 		IDTicket:       req.IDTicket,
 		QuantityTicket: req.QuantityTicket,
+		TotalPrice:     amount,
+		Status:         "PENDING",
+		DateOrder:      time.Now(),
 	}
 
-	var sn = snap.Client{}
+	if err := s.transactionRepository.Create(ctx, newTransaction); err != nil {
+		return nil, nil, fmt.Errorf("Failed to save transaction")
+	}
+
+	sn := snap.Client{}
 	sn.New(s.cfg.MidtransConfig.Serverkey, midtrans.Sandbox)
 
-	return s.transactionRepository.Create(ctx.Request().Context(), transaction)
+	reqMidtrans := &snap.Request{
+		TransactionDetails: midtrans.TransactionDetails{
+			OrderID:  transactionID,
+			GrossAmt: int64(amount),
+		},
+	}
+
+	// Log request ke Midtrans
+	fmt.Printf("Request to Midtrans: %+v\n", reqMidtrans)
+
+	snapResp, err := sn.CreateTransaction(reqMidtrans)
+
+	// Log respons dari Midtrans
+	fmt.Printf("Response from Midtrans: %+v\n", snapResp)
+
+	return newTransaction, snapResp, nil
 }
 
 // GetAll implements TicketService.
@@ -57,7 +88,7 @@ func (s *transactionService) GetAll(ctx context.Context) ([]entity.Transaction, 
 }
 
 // GetByID implements TicketService.
-func (s *transactionService) GetByID(ctx context.Context, id int64) (*entity.Transaction, error) {
+func (s *transactionService) GetByID(ctx context.Context, id string) (*entity.Transaction, error) {
 	return s.transactionRepository.GetByID(ctx, id)
 }
 

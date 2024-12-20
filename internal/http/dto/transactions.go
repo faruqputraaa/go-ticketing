@@ -1,7 +1,7 @@
 package dto
 
 type GetTransactionByIDRequest struct {
-	IDTransaction int64 `param:"id_transaction" validate:"required"`
+	IDTransaction string `param:"id_transaction" validate:"required"`
 }
 
 type GetTransactionByIDUserRequest struct {
@@ -9,13 +9,13 @@ type GetTransactionByIDUserRequest struct {
 }
 
 type CreateTransactionRequest struct {
-	QuantityTicket int     `json:"quantity_ticket" validate:"required"`
-	IDTicket       int     `json:"id_ticket" validate:"required"`
-	TotalPrice     float64 `json:"total_price" validate:"required"`
+	QuantityTicket int     `json:"quantity_ticket" validate:"required,min=1"`
+	IDTicket       int64   `json:"id_ticket" validate:"required"`
+	TotalPrice     float64 `json:"total_price" validate:"-"`
 }
 
 type UpdateTransactionRequest struct {
-	IDTransaction  int64  `param:"id_offer" validate:"required"`
+	IDTransaction  string `param:"id_offer" validate:"required"`
 	IDUser         int    `json:"id_user" validate:"required"`
 	QuantityTicket string `json:"quantity_ticket" validate:"required"`
 	IDTicket       string `json:"id_ticket" validate:"required"`

@@ -1,7 +1,7 @@
 BEGIN;
 
 CREATE TABLE IF NOT EXISTS transactions(
-    id_transaction BIGSERIAL PRIMARY KEY,
+    id_transaction VARCHAR(255) PRIMARY KEY,
     id_user INT NOT NULL,
     quantity_ticket INT NOT NULL,
     id_ticket INT NOT NULL,
