@@ -100,7 +100,7 @@ func PrivateRoutes(
 			Method:  http.MethodGet,
 			Path:    "/offers",
 			Handler: offerHandler.GetOffers,
-			Roles:   allRoles,
+			Roles:   adminOnly,
 		},
 		{
 			Method:  http.MethodPost,
@@ -112,19 +112,19 @@ func PrivateRoutes(
 			Method:  http.MethodGet,
 			Path:    "/offers/:id_offer",
 			Handler: offerHandler.GetOffer,
-			Roles:   allRoles,
+			Roles:   adminOnly,
 		},
 		{
 			Method:  http.MethodPut,
 			Path:    "/offer/approve/:id_offer",
 			Handler: offerHandler.ApproveOffer,
-			Roles:   allRoles,
+			Roles:   adminOnly,
 		},
 		{
 			Method:  http.MethodPut,
 			Path:    "/offer/reject/:id_offer",
 			Handler: offerHandler.RejectOffer,
-			Roles:   allRoles,
+			Roles:   adminOnly,
 		},
 		{
 			Method:  http.MethodGet,
