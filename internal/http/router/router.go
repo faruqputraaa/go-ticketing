@@ -160,13 +160,13 @@ func PrivateRoutes(
 			Method:  http.MethodPut,
 			Path:    "/ticket/:id_ticket",
 			Handler: ticketHandler.UpdateTicket,
-			Roles:   allRoles,
+			Roles:   adminOnly,
 		},
 		{
 			Method:  http.MethodDelete,
 			Path:    "/ticket/:id_ticket",
 			Handler: ticketHandler.DeleteTicket,
-			Roles:   allRoles,
+			Roles:   adminOnly,
 		},
 		{
 			Method:  http.MethodPost,
