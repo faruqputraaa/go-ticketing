@@ -20,3 +20,11 @@ type UpdateEventRequest struct {
 	Time        time.Time `json:"time" validate:"required"`
 	Description string    `json:"description" validate:"required"`
 }
+
+type GetAllEventsRequest struct {
+	Page   int    `query:"page" validate:"required"`
+	Limit  int    `query:"limit" validate:"required"`
+	Search string `query:"search" validate:"required"`
+	Order  string `query:"order" validate:"required"`
+	Sort   string `query:"sort" validate:"required"`
+}

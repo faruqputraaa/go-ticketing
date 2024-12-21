@@ -69,16 +69,6 @@ func PublicRoutes(
 			Path:    "/event/:id_event",
 			Handler: eventHandler.DeleteEvent,
 		},
-		{
-			Method:  http.MethodGet,
-			Path:    "/event/search/name",
-			Handler: eventHandler.SearchByName,
-		},
-		{
-			Method:  http.MethodGet,
-			Path:    "/event/search/location",
-			Handler: eventHandler.SearchByLocation,
-		},
 	}
 
 }

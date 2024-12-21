@@ -2,19 +2,19 @@ package repository
 
 import (
 	"context"
+	"strings"
 
 	"github.com/faruqputraaa/go-ticket/internal/entity"
+	"github.com/faruqputraaa/go-ticket/internal/http/dto"
 	"gorm.io/gorm"
 )
 
 type EventRepository interface {
-	GetAll(ctx context.Context) ([]entity.Event, error)
+	GetAll(ctx context.Context, req dto.GetAllEventsRequest) ([]entity.Event, error)
 	GetByID(ctx context.Context, id int64) (*entity.Event, error)
 	Create(ctx context.Context, event *entity.Event) error
 	Update(ctx context.Context, event *entity.Event) error
 	Delete(ctx context.Context, event *entity.Event) error
-	SearchByName(ctx context.Context, name string) ([]entity.Event, error)
-	SearchByLocation(ctx context.Context, location string) ([]entity.Event, error)
 }
 
 type eventRepository struct {
@@ -26,10 +26,25 @@ func NewEventRepository(db *gorm.DB) EventRepository {
 }
 
 // GetAll
-func (r *eventRepository) GetAll(ctx context.Context) ([]entity.Event, error) {
+func (r *eventRepository) GetAll(ctx context.Context, req dto.GetAllEventsRequest) ([]entity.Event, error) {
 	result := make([]entity.Event, 0)
 
-	if err := r.db.WithContext(ctx).Find(&result).Error; err != nil {
+	query := r.db.WithContext(ctx)
+	if req.Search != "" {
+		search := strings.ToLower(req.Search)
+		query = query.Where("LOWER(name) LIKE ?", "%"+search+"%").
+			Or("LOWER(location) LIKE ?", "%"+search+"%")
+	}
+
+	if req.Sort != "" && req.Order != "" {
+		query = query.Order(req.Sort + " " + req.Order)
+	}
+
+	if req.Page > 0 && req.Limit > 0 {
+		query = query.Offset((req.Page - 1) * req.Limit).Limit(req.Limit)
+	}
+
+	if err := query.Find(&result).Error; err != nil {
 		return nil, err
 	}
 	return result, nil
@@ -57,20 +72,4 @@ func (r *eventRepository) Update(ctx context.Context, event *entity.Event) error
 // Delete
 func (r *eventRepository) Delete(ctx context.Context, event *entity.Event) error {
 	return r.db.WithContext(ctx).Where("id_event = ?", event.IDEvent).Delete(&event).Error
-}
-
-func (r *eventRepository) SearchByName(ctx context.Context, name string) ([]entity.Event, error) {
-	var events []entity.Event
-	if err := r.db.WithContext(ctx).Where("name LIKE ?", "%"+name+"%").Find(&events).Error; err != nil {
-		return nil, err
-	}
-	return events, nil
-}
-
-func (r *eventRepository) SearchByLocation(ctx context.Context, location string) ([]entity.Event, error) {
-	var events []entity.Event
-	if err := r.db.WithContext(ctx).Where("location LIKE ?", "%"+location+"%").Find(&events).Error; err != nil {
-		return nil, err
-	}
-	return events, nil
 }

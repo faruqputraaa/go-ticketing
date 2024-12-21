@@ -10,12 +10,10 @@ import (
 
 type EventService interface {
 	Create(ctx context.Context, req dto.CreateEventRequest) error
-	GetAll(ctx context.Context) ([]entity.Event, error)
+	GetAll(ctx context.Context, req dto.GetAllEventsRequest) ([]entity.Event, error)
 	GetByID(ctx context.Context, id int64) (*entity.Event, error)
 	Update(ctx context.Context, req dto.UpdateEventRequest) error
 	Delete(ctx context.Context, event *entity.Event) error
-	SearchByName(ctx context.Context, name string) ([]entity.Event, error)
-	SearchByLocation(ctx context.Context, location string) ([]entity.Event, error)
 }
 
 type eventService struct {
@@ -37,8 +35,8 @@ func (s *eventService) Create(ctx context.Context, req dto.CreateEventRequest) e
 	return s.eventRepository.Create(ctx, event)
 }
 
-func (s *eventService) GetAll(ctx context.Context) ([]entity.Event, error) {
-	return s.eventRepository.GetAll(ctx)
+func (s *eventService) GetAll(ctx context.Context, req dto.GetAllEventsRequest) ([]entity.Event, error) {
+	return s.eventRepository.GetAll(ctx, req)
 }
 
 func (s *eventService) GetByID(ctx context.Context, id int64) (*entity.Event, error) {
@@ -68,12 +66,4 @@ func (s *eventService) Update(ctx context.Context, req dto.UpdateEventRequest) e
 
 func (s *eventService) Delete(ctx context.Context, event *entity.Event) error {
 	return s.eventRepository.Delete(ctx, event)
-}
-
-func (s *eventService) SearchByName(ctx context.Context, name string) ([]entity.Event, error) {
-	return s.eventRepository.SearchByName(ctx, name)
-}
-
-func (s *eventService) SearchByLocation(ctx context.Context, location string) ([]entity.Event, error) {
-	return s.eventRepository.SearchByLocation(ctx, location)
 }
