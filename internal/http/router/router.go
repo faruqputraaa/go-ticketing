@@ -16,6 +16,7 @@ func PublicRoutes(
 	userHandler handler.UserHandler,
 	ticketHandler handler.TicketHandler,
 	eventHandler handler.EventHandler,
+	transactionHandler handler.TransactionHandler,
 ) []route.Route {
 	return []route.Route{
 		{
@@ -53,6 +54,11 @@ func PublicRoutes(
 			Method:  http.MethodGet,
 			Path:    "/event/:id_event",
 			Handler: eventHandler.GetEvent,
+		},
+		{
+			Method:  http.MethodPost,
+			Path:    "/webhook",
+			Handler: transactionHandler.HandleMidtransWebhook,
 		},
 	}
 

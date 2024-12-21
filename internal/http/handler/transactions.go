@@ -79,3 +79,57 @@ func (h *TransactionHandler) GetTransactionByIDUser(ctx echo.Context) error {
 
 	return ctx.JSON(http.StatusOK, response.SuccessResponse("Successfully showing transactions by user ID", transactions))
 }
+
+func (h *TransactionHandler) HandleMidtransWebhook(ctx echo.Context) error {
+	var notificationPayload map[string]interface{}
+
+	if err := ctx.Bind(&notificationPayload); err != nil {
+		return ctx.JSON(http.StatusBadRequest, response.ErrorResponse(http.StatusBadRequest, "Invalid notification payload"))
+	}
+
+	orderID, ok := notificationPayload["order_id"].(string)
+	if !ok {
+		return ctx.JSON(http.StatusBadRequest, response.ErrorResponse(http.StatusBadRequest, "Invalid order ID"))
+	}
+
+	transactionStatus, ok := notificationPayload["transaction_status"].(string)
+	if !ok {
+		return ctx.JSON(http.StatusBadRequest, response.ErrorResponse(http.StatusBadRequest, "Invalid transaction status"))
+	}
+
+	// Get message from Midtrans notification
+	transactionMessage := fmt.Sprintf("Payment notification received: %s", transactionStatus)
+	if statusMsg, ok := notificationPayload["status_message"].(string); ok && statusMsg != "" {
+		transactionMessage = statusMsg
+	}
+
+	// Map Midtrans status to your application status
+	var status string
+	switch transactionStatus {
+	case "capture", "settlement":
+		status = "SUCCESS"
+	case "pending":
+		status = "PENDING"
+	case "deny", "cancel", "expire", "failure":
+		status = "FAILED"
+	default:
+		status = "UNKNOWN"
+	}
+
+	// First, update the transaction status
+	updateReq := dto.UpdateTransactionRequest{
+		IDTransaction: orderID,
+		Status:        status,
+	}
+
+	if err := h.transactionService.Update(ctx.Request().Context(), updateReq); err != nil {
+		return ctx.JSON(http.StatusInternalServerError, response.ErrorResponse(http.StatusInternalServerError, err.Error()))
+	}
+
+	// Then, create the transaction log
+	if err := h.transactionService.LogTransaction(ctx.Request().Context(), orderID, transactionMessage); err != nil {
+		return ctx.JSON(http.StatusInternalServerError, response.ErrorResponse(http.StatusInternalServerError, "Failed to create transaction log"))
+	}
+
+	return ctx.JSON(http.StatusOK, response.SuccessResponse("Webhook processed successfully", nil))
+}

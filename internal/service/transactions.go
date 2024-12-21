@@ -19,6 +19,7 @@ type TransactionService interface {
 	GetByIDUser(ctx context.Context, IDUser int) ([]entity.Transaction, error)
 	Create(ctx context.Context, req dto.CreateTransactionRequest, claims *entity.JWTCustomClaims) (*entity.Transaction, *snap.Response, error)
 	Update(ctx context.Context, transaction dto.UpdateTransactionRequest) error
+	LogTransaction(ctx context.Context, transactionID string, message string) error
 }
 
 type transactionService struct {
@@ -96,11 +97,25 @@ func (s *transactionService) GetByIDUser(ctx context.Context, IDUser int) ([]ent
 	return s.transactionRepository.GetByIdUser(ctx, IDUser)
 }
 
+func (s *transactionService) LogTransaction(ctx context.Context, transactionID string, message string) error {
+	transactionLog := &entity.TransactionLog{
+		TransactionID: transactionID,
+		Message:       message,
+		CreatedAt:     time.Now(),
+	}
+
+	return s.transactionRepository.CreateLogTransaction(ctx, transactionLog)
+}
+
+// Update the Update method
 func (s *transactionService) Update(ctx context.Context, req dto.UpdateTransactionRequest) error {
 	transaction, err := s.transactionRepository.GetByID(ctx, req.IDTransaction)
 	if err != nil {
-		return err
+		return fmt.Errorf("transaction not found: %v", err)
 	}
+
+	// Update the transaction status
+	transaction.Status = req.Status
 
 	return s.transactionRepository.Update(ctx, transaction)
 }
