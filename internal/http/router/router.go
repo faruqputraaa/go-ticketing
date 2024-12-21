@@ -50,24 +50,9 @@ func PublicRoutes(
 			Handler: eventHandler.GetEvents,
 		},
 		{
-			Method:  http.MethodPost,
-			Path:    "/event",
-			Handler: eventHandler.CreateEvent,
-		},
-		{
 			Method:  http.MethodGet,
 			Path:    "/event/:id_event",
 			Handler: eventHandler.GetEvent,
-		},
-		{
-			Method:  http.MethodPut,
-			Path:    "/event/:id_event",
-			Handler: eventHandler.UpdateEvent,
-		},
-		{
-			Method:  http.MethodDelete,
-			Path:    "/event/:id_event",
-			Handler: eventHandler.DeleteEvent,
 		},
 	}
 
@@ -206,6 +191,24 @@ func PrivateRoutes(
 			Path:    "/transaction/user",
 			Handler: transactionHandler.GetTransactionByIDUser,
 			Roles:   allRoles,
+		},
+		{
+			Method:  http.MethodPost,
+			Path:    "/event",
+			Handler: eventHandler.CreateEvent,
+			Roles:   adminOnly,
+		},
+		{
+			Method:  http.MethodDelete,
+			Path:    "/event/:id_event",
+			Handler: eventHandler.DeleteEvent,
+			Roles:   adminOnly,
+		},
+		{
+			Method:  http.MethodPut,
+			Path:    "/event/:id_event",
+			Handler: eventHandler.UpdateEvent,
+			Roles:   adminOnly,
 		},
 	}
 }
