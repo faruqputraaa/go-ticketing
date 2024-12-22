@@ -8,6 +8,7 @@ import (
 	"github.com/faruqputraaa/go-ticket/pkg/response"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
+	"gopkg.in/gomail.v2"
 	"net/http"
 )
 
@@ -86,7 +87,6 @@ func (h *TransactionHandler) HandleMidtransWebhook(ctx echo.Context) error {
 		return ctx.JSON(http.StatusBadRequest, response.ErrorResponse(http.StatusBadRequest, "Invalid notification payload"))
 	}
 
-	// Extract order_id and transaction_status from payload
 	orderID, ok := notificationPayload["order_id"].(string)
 	if !ok {
 		return ctx.JSON(http.StatusBadRequest, response.ErrorResponse(http.StatusBadRequest, "Invalid order ID"))
@@ -97,7 +97,6 @@ func (h *TransactionHandler) HandleMidtransWebhook(ctx echo.Context) error {
 		return ctx.JSON(http.StatusBadRequest, response.ErrorResponse(http.StatusBadRequest, "Invalid transaction status"))
 	}
 
-	// Default message and mapping
 	transactionMessage := fmt.Sprintf("Payment notification received: %s", transactionStatus)
 	if statusMsg, ok := notificationPayload["status_message"].(string); ok && statusMsg != "" {
 		transactionMessage = statusMsg
@@ -116,7 +115,6 @@ func (h *TransactionHandler) HandleMidtransWebhook(ctx echo.Context) error {
 		status = "UNKNOWN"
 	}
 
-	// Update the transaction status in the database
 	updateReq := dto.UpdateTransactionRequest{
 		IDTransaction: orderID,
 		Status:        status,
@@ -126,11 +124,22 @@ func (h *TransactionHandler) HandleMidtransWebhook(ctx echo.Context) error {
 		return ctx.JSON(http.StatusInternalServerError, response.ErrorResponse(http.StatusInternalServerError, err.Error()))
 	}
 
-	// Call LogTransaction to log the transaction with status
 	if err := h.transactionService.LogTransaction(ctx.Request().Context(), orderID, status, transactionMessage); err != nil {
 		return ctx.JSON(http.StatusInternalServerError, response.ErrorResponse(http.StatusInternalServerError, "Failed to create transaction log"))
 	}
 
-	// Return success response
 	return ctx.JSON(http.StatusOK, response.SuccessResponse("Webhook processed successfully", nil))
+}
+
+func (h *OfferHandler) sendEmail(mail *gomail.Message) error {
+	dialer := gomail.NewDialer(
+		h.cfg.SMTPConfig.Host,
+		h.cfg.SMTPConfig.Port,
+		h.cfg.SMTPConfig.Email,
+		h.cfg.SMTPConfig.Password,
+	)
+	if err := dialer.DialAndSend(mail); err != nil {
+		return err
+	}
+	return nil
 }

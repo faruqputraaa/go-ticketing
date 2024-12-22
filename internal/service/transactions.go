@@ -72,12 +72,10 @@ func (s *transactionService) Create(ctx context.Context, req dto.CreateTransacti
 		},
 	}
 
-	// Log request ke Midtrans
 	fmt.Printf("Request to Midtrans: %+v\n", reqMidtrans)
 
 	snapResp, err := sn.CreateTransaction(reqMidtrans)
 
-	// Log respons dari Midtrans
 	fmt.Printf("Response from Midtrans: %+v\n", snapResp)
 
 	return newTransaction, snapResp, nil
@@ -98,10 +96,9 @@ func (s *transactionService) GetByIDUser(ctx context.Context, IDUser int) ([]ent
 }
 
 func (s *transactionService) LogTransaction(ctx context.Context, transactionID string, status string, message string) error {
-	// Create a new transaction log entity, including the status
 	transactionLog := &entity.TransactionLog{
-		IDTransaction: transactionID, // Ensure it uses 'id_transaction' column name in DB
-		Status:        status,        // Set the status field here
+		IDTransaction: transactionID,
+		Status:        status,
 		Message:       message,
 		CreatedAt:     time.Now(),
 	}
@@ -117,8 +114,8 @@ func (s *transactionService) Update(ctx context.Context, req dto.UpdateTransacti
 		return fmt.Errorf("transaction not found: %v", err)
 	}
 
-	// Update the transaction status
 	transaction.Status = req.Status
 
 	return s.transactionRepository.Update(ctx, transaction)
+	
 }
