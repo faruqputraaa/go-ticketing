@@ -15,7 +15,7 @@ type CreateTransactionRequest struct {
 }
 
 type UpdateTransactionRequest struct {
-	IDTransaction  string `param:"id_offer" validate:"required"`
+	IDTransaction  string `param:"id_transaction" validate:"required"`
 	IDUser         int    `json:"id_user" validate:"required"`
 	QuantityTicket string `json:"quantity_ticket" validate:"required"`
 	IDTicket       string `json:"id_ticket" validate:"required"`
