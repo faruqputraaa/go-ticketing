@@ -4,7 +4,7 @@ import "time"
 
 type TransactionLog struct {
 	IDTransactionLog int       `json:"id_transaction_log" gorm:"primaryKey"`
-	TransactionID    string    `json:"transaction_id"`
+	IDTransaction    string    `gorm:"column:id_transaction"`
 	Status           string    `json:"status"`
 	Message          string    `json:"message"`
 	CreatedAt        time.Time `json:"created_at"`

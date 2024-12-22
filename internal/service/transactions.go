@@ -19,7 +19,7 @@ type TransactionService interface {
 	GetByIDUser(ctx context.Context, IDUser int) ([]entity.Transaction, error)
 	Create(ctx context.Context, req dto.CreateTransactionRequest, claims *entity.JWTCustomClaims) (*entity.Transaction, *snap.Response, error)
 	Update(ctx context.Context, transaction dto.UpdateTransactionRequest) error
-	LogTransaction(ctx context.Context, transactionID string, message string) error
+	LogTransaction(ctx context.Context, transactionID string, status string, message string) error
 }
 
 type transactionService struct {
@@ -97,13 +97,16 @@ func (s *transactionService) GetByIDUser(ctx context.Context, IDUser int) ([]ent
 	return s.transactionRepository.GetByIdUser(ctx, IDUser)
 }
 
-func (s *transactionService) LogTransaction(ctx context.Context, transactionID string, message string) error {
+func (s *transactionService) LogTransaction(ctx context.Context, transactionID string, status string, message string) error {
+	// Create a new transaction log entity, including the status
 	transactionLog := &entity.TransactionLog{
-		TransactionID: transactionID,
+		IDTransaction: transactionID, // Ensure it uses 'id_transaction' column name in DB
+		Status:        status,        // Set the status field here
 		Message:       message,
 		CreatedAt:     time.Now(),
 	}
 
+	// Call the repository to insert the log into the database
 	return s.transactionRepository.CreateLogTransaction(ctx, transactionLog)
 }
 
