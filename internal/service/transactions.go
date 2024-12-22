@@ -44,7 +44,6 @@ func (s *transactionService) Create(ctx context.Context, req dto.CreateTransacti
 		return nil, nil, fmt.Errorf("ID ticket is required")
 	}
 
-	// Fetch ticket and user details
 	ticket, err := s.transactionRepository.GetTicketByID(ctx, req.IDTicket)
 	if err != nil {
 		return nil, nil, fmt.Errorf("Ticket not found")
@@ -58,7 +57,7 @@ func (s *transactionService) Create(ctx context.Context, req dto.CreateTransacti
 	var transaction *entity.Transaction
 	var snapResp *snap.Response
 
-	// If ticket price is 0, create transaction directly without Midtrans
+	// jika harga tiket gratis maka langsung success
 	if ticket.Price == 0 {
 		amount := 0.0
 		transactionID := fmt.Sprintf("TRX-%d", time.Now().Unix())
@@ -69,21 +68,18 @@ func (s *transactionService) Create(ctx context.Context, req dto.CreateTransacti
 			IDTicket:       req.IDTicket,
 			QuantityTicket: req.QuantityTicket,
 			TotalPrice:     amount,
-			Status:         "SUCCESS", // Direct success because ticket price is 0
+			Status:         "SUCCESS",
 			DateOrder:      time.Now(),
 		}
 
-		// Save transaction to database
 		if err := s.transactionRepository.Create(ctx, transaction); err != nil {
 			return nil, nil, fmt.Errorf("Failed to save transaction")
 		}
 
-		// Send success email
 		if err := s.SendSuccessEmail(transaction.IDTransaction); err != nil {
 			return nil, nil, fmt.Errorf("Failed to send success email: %v", err)
 		}
 	} else {
-		// If ticket price > 0, process the transaction through Midtrans
 		amount := float64(ticket.Price) * float64(req.QuantityTicket)
 		transactionID := fmt.Sprintf("TRX-%d", time.Now().Unix())
 
@@ -97,12 +93,10 @@ func (s *transactionService) Create(ctx context.Context, req dto.CreateTransacti
 			DateOrder:      time.Now(),
 		}
 
-		// Save transaction to database
 		if err := s.transactionRepository.Create(ctx, transaction); err != nil {
 			return nil, nil, fmt.Errorf("Failed to save transaction")
 		}
 
-		// Call Midtrans to create a payment link
 		sn := snap.Client{}
 		sn.New(s.cfg.MidtransConfig.Serverkey, midtrans.Sandbox)
 
@@ -141,7 +135,6 @@ func (s *transactionService) LogTransaction(ctx context.Context, transactionID s
 		CreatedAt:     time.Now(),
 	}
 
-	// Call the repository to insert the log into the database
 	return s.transactionRepository.CreateLogTransaction(ctx, transactionLog)
 }
 
@@ -156,13 +149,11 @@ func (s *transactionService) Update(ctx context.Context, req dto.UpdateTransacti
 }
 
 func (s *transactionService) SendSuccessEmail(transactionID string) error {
-	// Fetch transaction and user details
 	transaction, err := s.transactionRepository.GetByID(context.Background(), transactionID)
 	if err != nil {
 		return fmt.Errorf("failed to retrieve transaction for sending email: %v", err)
 	}
 
-	// Get user associated with the transaction
 	user, err := s.transactionRepository.GetUserByID(context.Background(), transaction.IDUser)
 	if err != nil {
 		return fmt.Errorf("failed to retrieve user for sending email: %v", err)
