@@ -35,6 +35,19 @@ func (h *TransactionHandler) CreateTransaction(ctx echo.Context) error {
 		return ctx.JSON(http.StatusInternalServerError, response.ErrorResponse(http.StatusInternalServerError, err.Error()))
 	}
 
+	// Jika harga tiket adalah 0, snapResp akan bernilai nil
+	if transaction.TotalPrice == 0 {
+		respData := map[string]interface{}{
+			"transaction_id": transaction.IDTransaction,
+			"payment_url":    nil,
+			"total_amount":   transaction.TotalPrice,
+			"ticket_price":   transaction.TotalPrice / float64(transaction.QuantityTicket),
+			"quantity":       transaction.QuantityTicket,
+		}
+		return ctx.JSON(http.StatusOK, response.SuccessResponse("Transaction created successfully", respData))
+	}
+
+	// Jika harga tiket lebih dari 0, lanjutkan dengan payment URL dari Midtrans
 	respData := map[string]interface{}{
 		"transaction_id": transaction.IDTransaction,
 		"payment_url":    snapResp.RedirectURL,

@@ -45,6 +45,32 @@ func (s *transactionService) Create(ctx context.Context, req dto.CreateTransacti
 		return nil, nil, fmt.Errorf("Ticket not found")
 	}
 
+	// Cek jika harga tiket 0
+	if ticket.Price == 0 {
+		// Jika harga tiket 0, langsung buat transaksi tanpa Midtrans
+		amount := 0.0 // Total harga = 0
+		transactionID := fmt.Sprintf("TRX-%d", time.Now().Unix())
+
+		newTransaction := &entity.Transaction{
+			IDTransaction:  transactionID,
+			IDUser:         claims.IDUser,
+			IDTicket:       req.IDTicket,
+			QuantityTicket: req.QuantityTicket,
+			TotalPrice:     amount,
+			Status:         "SUCCESS", // Status langsung sukses karena harga 0
+			DateOrder:      time.Now(),
+		}
+
+		// Simpan transaksi ke database
+		if err := s.transactionRepository.Create(ctx, newTransaction); err != nil {
+			return nil, nil, fmt.Errorf("Failed to save transaction")
+		}
+
+		// Kembalikan transaksi tanpa response Midtrans
+		return newTransaction, nil, nil
+	}
+
+	// Jika harga tiket lebih dari 0, lanjutkan dengan proses transaksi melalui Midtrans
 	amount := float64(ticket.Price) * float64(req.QuantityTicket)
 	transactionID := fmt.Sprintf("TRX-%d", time.Now().Unix())
 
@@ -117,5 +143,5 @@ func (s *transactionService) Update(ctx context.Context, req dto.UpdateTransacti
 	transaction.Status = req.Status
 
 	return s.transactionRepository.Update(ctx, transaction)
-	
+
 }
