@@ -160,3 +160,16 @@ func (h *OfferHandler) ApproveOffer(ctx echo.Context) error {
 func (h *OfferHandler) RejectOffer(ctx echo.Context) error {
 	return h.updateOfferStatus(ctx, "REJECTED")
 }
+
+func (h *OfferHandler) sendEmail(mail *gomail.Message) error {
+	dialer := gomail.NewDialer(
+		h.cfg.SMTPConfig.Host,
+		h.cfg.SMTPConfig.Port,
+		h.cfg.SMTPConfig.Email,
+		h.cfg.SMTPConfig.Password,
+	)
+	if err := dialer.DialAndSend(mail); err != nil {
+		return err
+	}
+	return nil
+}

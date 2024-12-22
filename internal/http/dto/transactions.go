@@ -11,6 +11,7 @@ type GetTransactionByIDUserRequest struct {
 type CreateTransactionRequest struct {
 	QuantityTicket int     `json:"quantity_ticket" validate:"required,min=1"`
 	IDTicket       int64   `json:"id_ticket" validate:"required"`
+	IDUser         int     `json:"id_user" validate:"required"`
 	TotalPrice     float64 `json:"total_price" validate:"-"`
 }
 

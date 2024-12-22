@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transaction Success</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            text-align: center;
+            color: #333;
+        }
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        .transaction-details {
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+        .transaction-details table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .transaction-details th, .transaction-details td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 14px;
+            color: #555;
+        }
+        .button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        .button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>Transaction Successful</h1>
+        <p>Dear Customer,</p>
+        <p>Your transaction has been successfully completed.</p>
+    </div>
+
+    <div class="transaction-details">
+        <h3>Transaction Details:</h3>
+        <table>
+            <tr>
+                <th>Transaction ID</th>
+                <td>{{.TransactionID}}</td>
+            </tr>
+            <tr>
+                <th>Quantity</th>
+                <td>{{.Quantity}}</td>
+            </tr>
+            <tr>
+                <th>Total Price</th>
+                <td>{{.TotalPrice}}</td>
+            </tr>
+            <tr>
+                <th>Status</th>
+                <td>{{.Status}}</td>
+            </tr>
+            <tr>
+                <th>Date of Order</th>
+                <td>{{.DateOrder}}</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="footer">
+        <p>Terima kasih telah menggunakan layanan kami!</p>
+        <p>&copy; 2024 Admin GoTicketing</p>
+    </div>
+</div>
+</body>
+</html>

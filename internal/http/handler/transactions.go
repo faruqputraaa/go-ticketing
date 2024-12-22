@@ -8,7 +8,6 @@ import (
 	"github.com/faruqputraaa/go-ticket/pkg/response"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
-	"gopkg.in/gomail.v2"
 	"net/http"
 )
 
@@ -23,13 +22,16 @@ func NewTransactionHandler(transactionService service.TransactionService) Transa
 func (h *TransactionHandler) CreateTransaction(ctx echo.Context) error {
 	var req dto.CreateTransactionRequest
 
+	// Mendapatkan klaim dari token JWT
 	user := ctx.Get("user").(*jwt.Token)
 	claims := user.Claims.(*entity.JWTCustomClaims)
 
+	// Mengikat request body
 	if err := ctx.Bind(&req); err != nil {
 		return ctx.JSON(http.StatusBadRequest, response.ErrorResponse(http.StatusBadRequest, "Invalid request body"))
 	}
 
+	// Memanggil service untuk membuat transaksi
 	transaction, snapResp, err := h.transactionService.Create(ctx.Request().Context(), req, claims)
 	if err != nil {
 		return ctx.JSON(http.StatusInternalServerError, response.ErrorResponse(http.StatusInternalServerError, err.Error()))
@@ -47,7 +49,7 @@ func (h *TransactionHandler) CreateTransaction(ctx echo.Context) error {
 		return ctx.JSON(http.StatusOK, response.SuccessResponse("Transaction created successfully", respData))
 	}
 
-	// Jika harga tiket lebih dari 0, lanjutkan dengan payment URL dari Midtrans
+	// Jika harga tiket lebih dari 0, lanjutkan dengan pembayaran melalui Midtrans
 	respData := map[string]interface{}{
 		"transaction_id": transaction.IDTransaction,
 		"payment_url":    snapResp.RedirectURL,
@@ -115,7 +117,7 @@ func (h *TransactionHandler) HandleMidtransWebhook(ctx echo.Context) error {
 		transactionMessage = statusMsg
 	}
 
-	// Determine status based on transaction status
+	// Tentukan status berdasarkan status transaksi
 	var status string
 	switch transactionStatus {
 	case "capture", "settlement":
@@ -128,6 +130,7 @@ func (h *TransactionHandler) HandleMidtransWebhook(ctx echo.Context) error {
 		status = "UNKNOWN"
 	}
 
+	// Memanggil service untuk update status transaksi
 	updateReq := dto.UpdateTransactionRequest{
 		IDTransaction: orderID,
 		Status:        status,
@@ -137,22 +140,17 @@ func (h *TransactionHandler) HandleMidtransWebhook(ctx echo.Context) error {
 		return ctx.JSON(http.StatusInternalServerError, response.ErrorResponse(http.StatusInternalServerError, err.Error()))
 	}
 
+	// Jika statusnya "SUCCESS", kirim email pemberitahuan kepada pengguna
+	if status == "SUCCESS" {
+		if err := h.transactionService.SendSuccessEmail(orderID); err != nil {
+			return ctx.JSON(http.StatusInternalServerError, response.ErrorResponse(http.StatusInternalServerError, "Failed to send success email"))
+		}
+	}
+
+	// Log transaksi
 	if err := h.transactionService.LogTransaction(ctx.Request().Context(), orderID, status, transactionMessage); err != nil {
 		return ctx.JSON(http.StatusInternalServerError, response.ErrorResponse(http.StatusInternalServerError, "Failed to create transaction log"))
 	}
 
 	return ctx.JSON(http.StatusOK, response.SuccessResponse("Webhook processed successfully", nil))
-}
-
-func (h *OfferHandler) sendEmail(mail *gomail.Message) error {
-	dialer := gomail.NewDialer(
-		h.cfg.SMTPConfig.Host,
-		h.cfg.SMTPConfig.Port,
-		h.cfg.SMTPConfig.Email,
-		h.cfg.SMTPConfig.Password,
-	)
-	if err := dialer.DialAndSend(mail); err != nil {
-		return err
-	}
-	return nil
 }

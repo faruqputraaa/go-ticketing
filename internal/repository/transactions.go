@@ -14,6 +14,7 @@ type TransactionRepository interface {
 	Create(ctx context.Context, transaction *entity.Transaction) error
 	Update(ctx context.Context, transaction *entity.Transaction) error
 	GetTicketByID(ctx context.Context, id int64) (*entity.Ticket, error)
+	GetUserByID(ctx context.Context, id int) (*entity.User, error)
 	CreateLogTransaction(ctx context.Context, log *entity.TransactionLog) error
 }
 
@@ -51,6 +52,15 @@ func (r *transactionRepository) GetTicketByID(ctx context.Context, id int64) (*e
 	result := new(entity.Ticket)
 
 	if err := r.db.WithContext(ctx).Where("id_ticket = ?", id).First(&result).Error; err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+func (r *transactionRepository) GetUserByID(ctx context.Context, id int) (*entity.User, error) {
+	result := new(entity.User)
+
+	if err := r.db.WithContext(ctx).Where("id_user = ?", id).First(&result).Error; err != nil {
 		return nil, err
 	}
 	return result, nil

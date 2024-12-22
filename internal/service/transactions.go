@@ -1,6 +1,7 @@
 package service
 
 import (
+	"bytes"
 	"context"
 	_ "errors"
 	"fmt"
@@ -10,6 +11,8 @@ import (
 	"github.com/faruqputraaa/go-ticket/internal/repository"
 	"github.com/midtrans/midtrans-go"
 	"github.com/midtrans/midtrans-go/snap"
+	"gopkg.in/gomail.v2"
+	"text/template"
 	"time"
 )
 
@@ -18,8 +21,9 @@ type TransactionService interface {
 	GetByID(ctx context.Context, id string) (*entity.Transaction, error)
 	GetByIDUser(ctx context.Context, IDUser int) ([]entity.Transaction, error)
 	Create(ctx context.Context, req dto.CreateTransactionRequest, claims *entity.JWTCustomClaims) (*entity.Transaction, *snap.Response, error)
-	Update(ctx context.Context, transaction dto.UpdateTransactionRequest) error
+	Update(ctx context.Context, req dto.UpdateTransactionRequest) error
 	LogTransaction(ctx context.Context, transactionID string, status string, message string) error
+	SendSuccessEmail(transactionID string) error
 }
 
 type transactionService struct {
@@ -40,71 +44,79 @@ func (s *transactionService) Create(ctx context.Context, req dto.CreateTransacti
 		return nil, nil, fmt.Errorf("ID ticket is required")
 	}
 
+	// Fetch ticket and user details
 	ticket, err := s.transactionRepository.GetTicketByID(ctx, req.IDTicket)
 	if err != nil {
 		return nil, nil, fmt.Errorf("Ticket not found")
 	}
 
-	// Cek jika harga tiket 0
+	_, err = s.transactionRepository.GetUserByID(ctx, req.IDUser)
+	if err != nil {
+		return nil, nil, fmt.Errorf("User not found")
+	}
+
+	var transaction *entity.Transaction
+	var snapResp *snap.Response
+
+	// If ticket price is 0, create transaction directly without Midtrans
 	if ticket.Price == 0 {
-		// Jika harga tiket 0, langsung buat transaksi tanpa Midtrans
-		amount := 0.0 // Total harga = 0
+		amount := 0.0
 		transactionID := fmt.Sprintf("TRX-%d", time.Now().Unix())
 
-		newTransaction := &entity.Transaction{
+		transaction = &entity.Transaction{
 			IDTransaction:  transactionID,
 			IDUser:         claims.IDUser,
 			IDTicket:       req.IDTicket,
 			QuantityTicket: req.QuantityTicket,
 			TotalPrice:     amount,
-			Status:         "SUCCESS", // Status langsung sukses karena harga 0
+			Status:         "SUCCESS", // Direct success because ticket price is 0
 			DateOrder:      time.Now(),
 		}
 
-		// Simpan transaksi ke database
-		if err := s.transactionRepository.Create(ctx, newTransaction); err != nil {
+		// Save transaction to database
+		if err := s.transactionRepository.Create(ctx, transaction); err != nil {
 			return nil, nil, fmt.Errorf("Failed to save transaction")
 		}
 
-		// Kembalikan transaksi tanpa response Midtrans
-		return newTransaction, nil, nil
+		// Send success email
+		if err := s.SendSuccessEmail(transaction.IDTransaction); err != nil {
+			return nil, nil, fmt.Errorf("Failed to send success email: %v", err)
+		}
+	} else {
+		// If ticket price > 0, process the transaction through Midtrans
+		amount := float64(ticket.Price) * float64(req.QuantityTicket)
+		transactionID := fmt.Sprintf("TRX-%d", time.Now().Unix())
+
+		transaction = &entity.Transaction{
+			IDTransaction:  transactionID,
+			IDUser:         claims.IDUser,
+			IDTicket:       req.IDTicket,
+			QuantityTicket: req.QuantityTicket,
+			TotalPrice:     amount,
+			Status:         "PENDING",
+			DateOrder:      time.Now(),
+		}
+
+		// Save transaction to database
+		if err := s.transactionRepository.Create(ctx, transaction); err != nil {
+			return nil, nil, fmt.Errorf("Failed to save transaction")
+		}
+
+		// Call Midtrans to create a payment link
+		sn := snap.Client{}
+		sn.New(s.cfg.MidtransConfig.Serverkey, midtrans.Sandbox)
+
+		reqMidtrans := &snap.Request{
+			TransactionDetails: midtrans.TransactionDetails{
+				OrderID:  transactionID,
+				GrossAmt: int64(amount),
+			},
+		}
+
+		snapResp, err = sn.CreateTransaction(reqMidtrans)
 	}
 
-	// Jika harga tiket lebih dari 0, lanjutkan dengan proses transaksi melalui Midtrans
-	amount := float64(ticket.Price) * float64(req.QuantityTicket)
-	transactionID := fmt.Sprintf("TRX-%d", time.Now().Unix())
-
-	newTransaction := &entity.Transaction{
-		IDTransaction:  transactionID,
-		IDUser:         claims.IDUser,
-		IDTicket:       req.IDTicket,
-		QuantityTicket: req.QuantityTicket,
-		TotalPrice:     amount,
-		Status:         "PENDING",
-		DateOrder:      time.Now(),
-	}
-
-	if err := s.transactionRepository.Create(ctx, newTransaction); err != nil {
-		return nil, nil, fmt.Errorf("Failed to save transaction")
-	}
-
-	sn := snap.Client{}
-	sn.New(s.cfg.MidtransConfig.Serverkey, midtrans.Sandbox)
-
-	reqMidtrans := &snap.Request{
-		TransactionDetails: midtrans.TransactionDetails{
-			OrderID:  transactionID,
-			GrossAmt: int64(amount),
-		},
-	}
-
-	fmt.Printf("Request to Midtrans: %+v\n", reqMidtrans)
-
-	snapResp, err := sn.CreateTransaction(reqMidtrans)
-
-	fmt.Printf("Response from Midtrans: %+v\n", snapResp)
-
-	return newTransaction, snapResp, nil
+	return transaction, snapResp, nil
 }
 
 // GetAll implements TicketService.
@@ -133,7 +145,6 @@ func (s *transactionService) LogTransaction(ctx context.Context, transactionID s
 	return s.transactionRepository.CreateLogTransaction(ctx, transactionLog)
 }
 
-// Update the Update method
 func (s *transactionService) Update(ctx context.Context, req dto.UpdateTransactionRequest) error {
 	transaction, err := s.transactionRepository.GetByID(ctx, req.IDTransaction)
 	if err != nil {
@@ -141,7 +152,59 @@ func (s *transactionService) Update(ctx context.Context, req dto.UpdateTransacti
 	}
 
 	transaction.Status = req.Status
-
 	return s.transactionRepository.Update(ctx, transaction)
+}
 
+func (s *transactionService) SendSuccessEmail(transactionID string) error {
+	// Fetch transaction and user details
+	transaction, err := s.transactionRepository.GetByID(context.Background(), transactionID)
+	if err != nil {
+		return fmt.Errorf("failed to retrieve transaction for sending email: %v", err)
+	}
+
+	// Get user associated with the transaction
+	user, err := s.transactionRepository.GetUserByID(context.Background(), transaction.IDUser)
+	if err != nil {
+		return fmt.Errorf("failed to retrieve user for sending email: %v", err)
+	}
+
+	// Email template setup
+	templatePath := "./templates/email/transaction-success.html"
+	tmpl, err := template.ParseFiles(templatePath)
+	if err != nil {
+		return fmt.Errorf("failed to parse email template: %v", err)
+	}
+
+	replacerEmail := map[string]interface{}{
+		"TransactionID": transaction.IDTransaction,
+		"TotalPrice":    transaction.TotalPrice,
+		"Quantity":      transaction.QuantityTicket,
+		"Status":        transaction.Status,
+		"DateOrder":     transaction.DateOrder.Format("2006-01-02 15:04:05"),
+	}
+
+	var body bytes.Buffer
+	if err := tmpl.Execute(&body, replacerEmail); err != nil {
+		return fmt.Errorf("failed to execute email template: %v", err)
+	}
+
+	// Send email to user
+	m := gomail.NewMessage()
+	m.SetHeader("From", s.cfg.SMTPConfig.Email)
+	m.SetHeader("To", user.Email)
+	m.SetHeader("Subject", "Transaction Successful")
+	m.SetBody("text/html", body.String())
+
+	d := gomail.NewDialer(
+		s.cfg.SMTPConfig.Host,
+		s.cfg.SMTPConfig.Port,
+		s.cfg.SMTPConfig.Email,
+		s.cfg.SMTPConfig.Password,
+	)
+
+	if err := d.DialAndSend(m); err != nil {
+		return fmt.Errorf("failed to send email: %v", err)
+	}
+
+	return nil
 }
