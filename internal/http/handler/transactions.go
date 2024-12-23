@@ -22,22 +22,18 @@ func NewTransactionHandler(transactionService service.TransactionService) Transa
 func (h *TransactionHandler) CreateTransaction(ctx echo.Context) error {
 	var req dto.CreateTransactionRequest
 
-	// Mendapatkan klaim dari token JWT
 	user := ctx.Get("user").(*jwt.Token)
 	claims := user.Claims.(*entity.JWTCustomClaims)
 
-	// Mengikat request body
 	if err := ctx.Bind(&req); err != nil {
 		return ctx.JSON(http.StatusBadRequest, response.ErrorResponse(http.StatusBadRequest, "Invalid request body"))
 	}
 
-	// Memanggil service untuk membuat transaksi
 	transaction, snapResp, err := h.transactionService.Create(ctx.Request().Context(), req, claims)
 	if err != nil {
 		return ctx.JSON(http.StatusInternalServerError, response.ErrorResponse(http.StatusInternalServerError, err.Error()))
 	}
 
-	// Jika harga tiket adalah 0, snapResp akan bernilai nil
 	if transaction.TotalPrice == 0 {
 		respData := map[string]interface{}{
 			"transaction_id": transaction.IDTransaction,
@@ -49,7 +45,6 @@ func (h *TransactionHandler) CreateTransaction(ctx echo.Context) error {
 		return ctx.JSON(http.StatusOK, response.SuccessResponse("Transaction created successfully", respData))
 	}
 
-	// Jika harga tiket lebih dari 0, lanjutkan dengan pembayaran melalui Midtrans
 	respData := map[string]interface{}{
 		"transaction_id": transaction.IDTransaction,
 		"payment_url":    snapResp.RedirectURL,

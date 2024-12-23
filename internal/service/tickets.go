@@ -66,8 +66,8 @@ func (s *ticketService) GetByID(ctx context.Context, id int64) (*entity.Ticket, 
 }
 
 // GetByIDEvent implements TicketService.
-func (s *ticketService) GetByIDEvent(ctx context.Context, IDevent int64) ([]entity.Ticket, error) {
-	return s.ticketRepository.GetByIdEvent(ctx, IDevent)
+func (s *ticketService) GetByIDEvent(ctx context.Context, IDEvent int64) ([]entity.Ticket, error) {
+	return s.ticketRepository.GetByIdEvent(ctx, IDEvent)
 }
 
 // Update implements TicketService.

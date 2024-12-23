@@ -5,7 +5,7 @@ type GetTicketByIDRequest struct {
 }
 
 type GetTicketByIDEventRequest struct {
-	IDEvent int64 `json:"id_event" validate:"required"`
+	IDEvent int64 `param:"id_event" validate:"required"`
 }
 
 type CreateTicketRequest struct {

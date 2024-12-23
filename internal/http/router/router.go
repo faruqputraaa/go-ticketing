@@ -163,6 +163,12 @@ func PrivateRoutes(
 			Roles:   allRoles,
 		},
 		{
+			Method:  http.MethodGet,
+			Path:    "/ticket-event/:id_event",
+			Handler: ticketHandler.GetTicketsByIDEvent,
+			Roles:   allRoles,
+		},
+		{
 			Method:  http.MethodPut,
 			Path:    "/ticket/:id_ticket",
 			Handler: ticketHandler.UpdateTicket,
